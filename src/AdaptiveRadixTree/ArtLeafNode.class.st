@@ -28,27 +28,26 @@ ArtLeafNode >> = anObject [
 ArtLeafNode >> at: aKey put: aValue depth: depth [
 	"Insert aValue at aKey, starting with given depth. This method is meant to be called recursively and is expected to return the inserted value"
 
-	| k newLeaf newContainer lcp |
+	| newLeaf newContainer lcp |
 
-	k := aKey asByteArray.
-	(self matchesKey: k)
+	(self matchesKey: aKey)
 		ifTrue: [ self value: aValue.
 			^ false ].
 
-	newLeaf := ArtNode leafWithKey: k value: aValue.
+	newLeaf := ArtNode leafWithKey: aKey value: aValue.
 	newContainer := ArtNode node4.
-	lcp := key longestCommonPrefixWith: newLeaf key startingAt: depth.
+	lcp := key longestCommonPrefixWith: aKey startingAt: depth.
 	newContainer
 		prefix:
-			(k
+			(aKey
 				copyFrom: depth
-				to: (depth - 1 + lcp min: ArtContainerNode maxPrefixSize));
+				to: ((depth + lcp - 1) min: ArtContainerNode maxPrefixSize));
 		prefixSize: lcp.
 
-	newContainer addChild: self copy at: (key at: depth + lcp).
-	newContainer addChild: newLeaf at: (newLeaf key at: depth + lcp).
-
 	self become: newContainer.
+	self addChild: newContainer at: (newContainer key at: depth + lcp).
+	self addChild: newLeaf at: (newLeaf key at: depth + lcp).
+
 	ArtCurrentTree value ifNotNil: [ :tree | tree addedChildren: 1 ].
 	^ aValue
 ]

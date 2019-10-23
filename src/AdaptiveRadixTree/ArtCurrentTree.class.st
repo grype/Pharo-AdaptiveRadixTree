@@ -1,5 +1,5 @@
 Class {
 	#name : #ArtCurrentTree,
 	#superclass : #DynamicVariable,
-	#category : #AdaptiveRadixTree
+	#category : #'AdaptiveRadixTree-Core'
 }

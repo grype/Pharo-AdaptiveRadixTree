@@ -62,7 +62,7 @@ ArtTree >> removeKey: aKey ifAbsent: absentBlock [
 
 							val := root.
 							root := nil.
-							self removedChildren: nil.
+							self removedChildren: 1.
 							val ]
 						ifFalse: [ root removeKey: k ifAbsent: absentBlock depth: 1 ] ] ]
 ]

@@ -14,6 +14,11 @@ ArtNode256 class >> maxSize [
 	^ 256
 ]
 
+{ #category : #accessing }
+ArtNode256 class >> minSize [
+	^ 49
+]
+
 { #category : #adding }
 ArtNode256 >> addChild: aChildNode at: aByte [
 	self isFull

@@ -26,6 +26,11 @@ ArtContainerNode class >> maxSize [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+ArtContainerNode class >> minSize [
+	^ self subclassResponsibility 
+]
+
 { #category : #comparing }
 ArtContainerNode >> = anObject [
 	"Answer whether the receiver and anObject represent the same object."
@@ -77,7 +82,7 @@ ArtContainerNode >> at: aKey put: aValue depth: depth [
 				at: (aKey at: currentDepth).
 			ArtCurrentTree value ifNotNil: [ :tree | tree addedChildren: 1 ].
 			^ aValue ]
-		ifNotNil: [ :nextNode | nextNode at: aKey put: aValue depth: currentDepth ]
+		ifNotNil: [ :nextNode | nextNode at: aKey put: aValue depth: currentDepth + 1 ]
 ]
 
 { #category : #accessing }
@@ -218,7 +223,7 @@ ArtContainerNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 	prefixSize > 0
 		ifTrue: [ (self prefixMismatchWith: aKey depth: depth) ~= (prefixSize + 1)
 				ifTrue: [ ^ absentBlock value ]
-				ifFalse: [ currentDepth := currentDepth - 1 + prefixSize ] ].
+				ifFalse: [ currentDepth := currentDepth + prefixSize ] ].
 			
 	^ (self at: (aKey at: currentDepth))
 		ifNil: [ absentBlock value ]
@@ -241,12 +246,12 @@ ArtContainerNode >> search: aKey depth: depth [
 
 			newDepth := depth + prefixSize.
 			(self at: (aKey at: newDepth))
-				ifNotNil: [ :nextNode | nextNode search: aKey depth: newDepth ] ]
+				ifNotNil: [ :nextNode | nextNode search: aKey depth: newDepth + 1 ] ]
 ]
 
 { #category : #adding }
 ArtContainerNode >> shiftChildrenAt: index [
-	index to: size - 1 do: [ :i | children at: index put: (children at: index + 1) ].
+	index to: size - 1 do: [ :i | children at: i put: (children at: i + 1) ].
 	children at: size put: nil
 ]
 
@@ -263,7 +268,7 @@ ArtContainerNode >> shiftChildrenLargerThan: aByte from: index [
 
 { #category : #adding }
 ArtContainerNode >> shiftKeysAtIndex: index [
-	index to: size - 1 do: [ :i | keys byteAt: index put: (keys byteAt: index + 1) ].
+	index to: size - 1 do: [ :i | keys byteAt: i put: (keys byteAt: i + 1) ].
 	keys byteAt: size put: 0
 ]
 
@@ -281,30 +286,29 @@ ArtContainerNode >> size [
 ArtContainerNode >> splitAtPrefixIndex: anIndex depth: depth [
 	"I am going to change into a new node4, split my original prefix and prefix size between the new me and the old me, and have the new me adopt the old me as a child"
 
-	| nextNode wholePrefix wholePrefixSize fullKey fullKeyIndex |
+	| nextNode originalPrefix originalPrefixSize fullPrefix nextPrefixStart |
 
-	wholePrefix := prefix.
-	wholePrefixSize := prefixSize.
+	originalPrefix := prefix.
+	originalPrefixSize := prefixSize.
 
 	nextNode := ArtNode node4.
 	self become: nextNode.
 
-	prefix := wholePrefix copyFrom: 1 to: anIndex - 1.
+	prefix := originalPrefix copyFrom: 1 to: anIndex - 1.
 	prefixSize := anIndex - 1.
 
-	nextNode prefixSize: wholePrefixSize - anIndex + 1.
+	nextNode prefixSize: nextNode prefixSize - anIndex.
 
-	fullKeyIndex := nextNode prefixSize - 1.
-	wholePrefixSize > self class maxPrefixSize
-		ifTrue: [ fullKey := nextNode minimum key.
-			fullKeyIndex := fullKeyIndex + depth + anIndex ]
-		ifFalse: [ fullKey := wholePrefix.
-			fullKeyIndex := fullKeyIndex + anIndex ].
+	fullPrefix := originalPrefix.
+	nextPrefixStart := anIndex.
+	originalPrefixSize < self class maxPrefixSize
+		ifFalse: [ fullPrefix := nextNode minimum key.
+			nextPrefixStart := depth - 1 + anIndex ].
 
+	self addChild: nextNode at: (fullPrefix byteAt: nextPrefixStart).
 	nextNode
 		prefix:
-			(fullKey
-				copyFrom: fullKeyIndex
-				to: (fullKeyIndex min: self class maxPrefixSize)).
-	self addChild: nextNode at: (fullKey byteAt: fullKeyIndex)
+			(fullPrefix
+				copyFrom: nextPrefixStart
+				to: nextPrefixStart + nextNode prefixSize - 1)
 ]

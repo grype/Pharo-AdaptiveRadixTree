@@ -14,6 +14,11 @@ ArtNode16 class >> maxSize [
 	^ 16
 ]
 
+{ #category : #accessing }
+ArtNode16 class >> minSize [
+	^ 5
+]
+
 { #category : #adding }
 ArtNode16 >> addChild: aChildNode at: aByte [
 	| index |

@@ -4,6 +4,16 @@ Class {
 	#category : #'AdaptiveRadixTree-Core'
 }
 
+{ #category : #accessing }
+ArtNode4 class >> maxSize [
+	^ 4
+]
+
+{ #category : #accessing }
+ArtNode4 class >> minSize [
+	^ 2
+]
+
 { #category : #adding }
 ArtNode4 >> addChild: aChildNode at: aByte [
 	| index |
@@ -81,5 +91,36 @@ ArtNode4 >> removeChildAt: aByte [
 	self shiftChildrenAt: index.
 
 	size := size - 1.
+	size < self class minSize
+		ifTrue: [ self shrink ].
 	^ answer
+]
+
+{ #category : #testing }
+ArtNode4 >> shrink [
+	| newNode currentPrefixSize |
+
+	newNode := children first.
+	newNode isLeaf
+		ifFalse: [ currentPrefixSize := prefixSize.
+			currentPrefixSize < self class maxPrefixSize
+				ifTrue: [ prefix := prefix copyWith: keys first.
+					currentPrefixSize := currentPrefixSize + 1 ].
+			currentPrefixSize < self class maxPrefixSize
+				ifTrue: [ | childPrefixSize |
+
+					childPrefixSize := newNode prefixSize
+						min: self class maxPrefixSize - currentPrefixSize.
+					prefix
+						replaceFrom: currentPrefixSize + 1
+						to: currentPrefixSize + childPrefixSize
+						with: newNode prefix.
+					currentPrefixSize := currentPrefixSize + childPrefixSize ].
+			newNode
+				prefix:
+					(prefix
+						copyFrom: 1
+						to: (currentPrefixSize min: self class maxPrefixSize)).
+			newNode prefixSize: newNode prefixSize + prefixSize + 1 ].
+	self become: newNode
 ]
