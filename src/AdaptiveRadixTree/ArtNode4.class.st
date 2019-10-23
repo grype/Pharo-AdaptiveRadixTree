@@ -14,8 +14,8 @@ ArtNode4 >> addChild: aChildNode at: aByte [
 
 	index := 1.
 
-	size > 0
-		ifTrue: [ index := keys
+	self isEmpty
+		ifFalse: [ index := keys
 				detectIndex: [ :each :i | aByte < each ]
 				from: 1
 				to: size
@@ -53,7 +53,33 @@ ArtNode4 >> indexOf: aKey [
 ]
 
 { #category : #accessing }
+ArtNode4 >> maximum [
+	"Returns the right-most leaf node by recursively traversing children using highest byte index"
+	^ (children at: size) maximum
+]
+
+{ #category : #accessing }
 ArtNode4 >> minimum [
 	"Returns the left-most leaf node by recursively traversing children using lowest byte index"
 	^ (children at: 1) minimum
+]
+
+{ #category : #adding }
+ArtNode4 >> removeChildAt: aByte [
+	| answer index |
+
+	answer := nil.
+	index := self indexOf: aByte.
+	index > 0
+		ifFalse: [ ^ answer ].
+
+	keys byteAt: index put: 0.
+	answer := children at: index.
+	children at: index put: nil.
+
+	self shiftKeysAtIndex: index.
+	self shiftChildrenAt: index.
+
+	size := size - 1.
+	^ answer
 ]

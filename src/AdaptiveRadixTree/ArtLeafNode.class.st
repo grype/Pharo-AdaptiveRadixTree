@@ -83,6 +83,11 @@ ArtLeafNode >> matchesKey: aKey [
 ]
 
 { #category : #accessing }
+ArtLeafNode >> maximum [
+	^ self
+]
+
+{ #category : #accessing }
 ArtLeafNode >> minimum [
 	"Returns the left-most leaf node by recursively traversing children using lowest byte index"
 	^ self
@@ -96,6 +101,11 @@ ArtLeafNode >> printOn: aStream [
 	aStream
 		nextPutAll: ' key: ';
 		print: key
+]
+
+{ #category : #removing }
+ArtLeafNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
+	^ self shouldNotImplement 
 ]
 
 { #category : #accessing }

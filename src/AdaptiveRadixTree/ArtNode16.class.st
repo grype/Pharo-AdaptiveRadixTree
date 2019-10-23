@@ -24,8 +24,8 @@ ArtNode16 >> addChild: aChildNode at: aByte [
 
 	index := 1.
 
-	size > 0
-		ifTrue: [ index := keys
+	self isEmpty
+		ifFalse: [ index := keys
 				findBinaryIndex: [ :byte | 
 					byte >= aByte
 						ifTrue: [ 0 ]
@@ -33,7 +33,7 @@ ArtNode16 >> addChild: aChildNode at: aByte [
 				ifNone: [ size + 1 ].
 			self shiftChildrenLargerThan: aByte from: index ].
 
-	keys at: index put: aByte.
+	keys byteAt: index put: aByte.
 	children at: index put: aChildNode.
 	size := size + 1.
 	^ aChildNode
@@ -68,7 +68,33 @@ ArtNode16 >> indexOf: aKey [
 ]
 
 { #category : #accessing }
+ArtNode16 >> maximum [
+	"Returns the right-most leaf node by recursively traversing children using highest byte index"
+	^ (children at: size) maximum
+]
+
+{ #category : #accessing }
 ArtNode16 >> minimum [
 	"Returns the left-most leaf node by recursively traversing children using lowest byte index"
 	^ (children at: 1) minimum
+]
+
+{ #category : #adding }
+ArtNode16 >> removeChildAt: aByte [
+	| answer index |
+
+	answer := nil.
+	index := self indexOf: aByte.
+	index > 0
+		ifFalse: [ ^ answer ].
+
+	keys byteAt: index put: 0.
+	answer := children at: index.
+	children at: index put: nil.
+
+	self shiftKeysAtIndex: index.
+	self shiftChildrenAt: index.
+
+	size := size - 1.
+	^ answer
 ]

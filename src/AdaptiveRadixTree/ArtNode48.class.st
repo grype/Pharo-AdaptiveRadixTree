@@ -25,7 +25,8 @@ ArtNode48 >> addChild: aChildNode at: aByte [
 	index := children detectIndex: [ :child | child isNil ].
 	children at: index put: aChildNode.
 	keys at: aByte put: index.
-	size := size + 1
+	size := size + 1.
+	^ aChildNode
 ]
 
 { #category : #testing }
@@ -45,6 +46,18 @@ ArtNode48 >> indexOf: aKey [
 ]
 
 { #category : #accessing }
+ArtNode48 >> maximum [
+	"Returns the right-most leaf node by recursively traversing children using highest byte index"
+
+	| index |
+
+	index := keys detectIndex: [ :byte | byte = 0 ] ifNone: [ ^ nil ].
+	index > 1
+		ifFalse: [ ^ nil ].
+	^ (children at: index - 1) maximum
+]
+
+{ #category : #accessing }
 ArtNode48 >> minimum [
 	"Returns the left-most leaf node by recursively traversing children using lowest byte index"
 
@@ -54,4 +67,26 @@ ArtNode48 >> minimum [
 		detectIndex: [ :byte :i | (keys at: i) ~= 0 ]
 		ifNone: [ keys size ].
 	^ (children at: index) minimum
+]
+
+{ #category : #adding }
+ArtNode48 >> removeChildAt: aByte [
+	| answer index |
+
+	answer := nil.
+	index := self indexOf: aByte.
+	index > 0
+		ifFalse: [ ^ answer ].
+
+	keys byteAt: aByte put: 0.
+	answer := children at: index.
+	children at: index put: nil.
+
+	size := size - 1.
+	^ answer
+]
+
+{ #category : #'private-adding' }
+ArtNode48 >> removeKeyAtIndex: index [
+
 ]

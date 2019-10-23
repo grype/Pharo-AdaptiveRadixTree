@@ -29,6 +29,12 @@ ArtTree >> at: aKey put: aValue [
 				ifNotNil: [ root at: key put: aValue depth: 1 ] ]
 ]
 
+{ #category : #accessing }
+ArtTree >> errorKeyNotFound: aKey [
+
+	KeyNotFound signalFor: aKey
+]
+
 { #category : #initialization }
 ArtTree >> initialize [
 	super initialize.
@@ -37,7 +43,28 @@ ArtTree >> initialize [
 
 { #category : #accessing }
 ArtTree >> removeKey: aKey [
-	^ self notYetImplemented 
+	^ self removeKey: aKey ifAbsent: [ self errorKeyNotFound: aKey ]
+]
+
+{ #category : #removing }
+ArtTree >> removeKey: aKey ifAbsent: absentBlock [
+	"Remove and answer value associated with given key. If key is not found, answer result of evaluating absentBlock."
+
+	| k |
+
+	k := aKey asByteArray ensureNullTerminated.
+	^ ArtCurrentTree
+		value: self
+		during: [ root
+				ifNil: [ absentBlock value ]
+				ifNotNil: [ root isLeaf
+						ifTrue: [ | val |
+
+							val := root.
+							root := nil.
+							self removedChildren: nil.
+							val ]
+						ifFalse: [ root removeKey: k ifAbsent: absentBlock depth: 1 ] ] ]
 ]
 
 { #category : #'state tracking' }

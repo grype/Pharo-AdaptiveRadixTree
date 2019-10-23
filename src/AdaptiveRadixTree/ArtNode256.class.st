@@ -46,3 +46,19 @@ ArtNode256 >> minimum [
 		ifNone: [ keys size ].
 	^ (children at: index) minimum
 ]
+
+{ #category : #adding }
+ArtNode256 >> removeChildAt: aByte [
+	| answer index |
+
+	answer := nil.
+	index := self indexOf: aByte.
+	index > 0
+		ifFalse: [ ^ answer ].
+
+	answer := children at: index.
+	children at: index put: nil.
+
+	size := size - 1.
+	^ answer
+]

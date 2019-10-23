@@ -42,8 +42,19 @@ ArtNode >> isLeaf [
 ]
 
 { #category : #accessing }
+ArtNode >> maximum [
+	"Returns the right-most leaf node by recursively traversing children using highest byte index"
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
 ArtNode >> minimum [
 	"Returns the left-most leaf node by recursively traversing children using lowest byte index"
+	^ self subclassResponsibility 
+]
+
+{ #category : #removing }
+ArtNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 	^ self subclassResponsibility 
 ]
 

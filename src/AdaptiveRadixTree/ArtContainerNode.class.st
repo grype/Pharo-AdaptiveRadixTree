@@ -38,8 +38,8 @@ ArtContainerNode >> = anObject [
 ]
 
 { #category : #adding }
-ArtContainerNode >> addChild: aChildNode at: aChar [
-	^ self subclassResponsibility
+ArtContainerNode >> addChild: aChildNode at: aByte [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -205,6 +205,34 @@ ArtContainerNode >> printOn: aStream [
 		print: keys
 ]
 
+{ #category : #adding }
+ArtContainerNode >> removeChildAt: aByte [
+	^ self subclassResponsibility 
+]
+
+{ #category : #removing }
+ArtContainerNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
+	| currentDepth |
+
+	currentDepth := depth.
+	prefixSize > 0
+		ifTrue: [ (self prefixMismatchWith: aKey depth: depth) ~= (prefixSize + 1)
+				ifTrue: [ ^ absentBlock value ]
+				ifFalse: [ currentDepth := currentDepth - 1 + prefixSize ] ].
+			
+	^ (self at: (aKey at: currentDepth))
+		ifNil: [ absentBlock value ]
+		ifNotNil: [ :next | 
+			(next isLeaf and: [ next matchesKey: aKey ])
+				ifTrue: [ | val |
+
+					val := self removeChildAt: (aKey at: currentDepth).
+					ArtCurrentTree value
+						ifNotNil: [ :tree | tree removedChildren: 1 ].
+					val ]
+				ifFalse: [ next removeKey: aKey ifAbsent: absentBlock depth: currentDepth + 1 ] ]
+]
+
 { #category : #accessing }
 ArtContainerNode >> search: aKey depth: depth [
 	^ (self prefixMismatchWith: aKey depth: depth) ~= (prefixSize + 1)
@@ -217,6 +245,12 @@ ArtContainerNode >> search: aKey depth: depth [
 ]
 
 { #category : #adding }
+ArtContainerNode >> shiftChildrenAt: index [
+	index to: size - 1 do: [ :i | children at: index put: (children at: index + 1) ].
+	children at: size put: nil
+]
+
+{ #category : #adding }
 ArtContainerNode >> shiftChildrenLargerThan: aByte from: index [
 	size to: index by: -1 do: [ :i | 
 		| previous |
@@ -225,6 +259,12 @@ ArtContainerNode >> shiftChildrenLargerThan: aByte from: index [
 		previous > aByte
 			ifTrue: [ keys ifNotNil: [ keys byteAt: i + 1 put: previous ].
 				children at: i + 1 put: (children at: i) ] ]
+]
+
+{ #category : #adding }
+ArtContainerNode >> shiftKeysAtIndex: index [
+	index to: size - 1 do: [ :i | keys byteAt: index put: (keys byteAt: index + 1) ].
+	keys byteAt: size put: 0
 ]
 
 { #category : #testing }
