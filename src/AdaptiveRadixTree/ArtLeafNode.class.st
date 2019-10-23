@@ -99,6 +99,13 @@ ArtLeafNode >> printOn: aStream [
 ]
 
 { #category : #accessing }
+ArtLeafNode >> search: aKey depth: depth [
+	^ (self matchesKey: aKey)
+		ifTrue: [ value ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 ArtLeafNode >> size [
 	^ 0
 ]

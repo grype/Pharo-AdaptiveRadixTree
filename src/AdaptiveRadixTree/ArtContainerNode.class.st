@@ -169,7 +169,8 @@ ArtContainerNode >> prefixMismatchWith: aKey depth: depth [
 						to: prefixSize
 						ifNone: [ prefixSize ] ] ]
 		ifFalse: [ ^ aKey
-				detectIndex: [ :byte :index | byte ~= (prefix byteAt: index) ]
+				detectIndex: [ :byte :index | 
+					byte ~= (prefix byteAt: index) ]
 				from: depth
 				to: prefixSize
 				ifNone: [ prefixSize + 1 ] ]
@@ -202,6 +203,17 @@ ArtContainerNode >> printOn: aStream [
 	aStream
 		nextPutAll: ' keys: ';
 		print: keys
+]
+
+{ #category : #accessing }
+ArtContainerNode >> search: aKey depth: depth [
+	^ (self prefixMismatchWith: aKey depth: depth) ~= (prefixSize + 1)
+		ifTrue: [ nil ]
+		ifFalse: [ | newDepth |
+
+			newDepth := depth + prefixSize.
+			(self at: (aKey at: newDepth))
+				ifNotNil: [ :nextNode | nextNode search: aKey depth: newDepth ] ]
 ]
 
 { #category : #adding }

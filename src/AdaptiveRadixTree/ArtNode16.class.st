@@ -51,7 +51,7 @@ ArtNode16 >> grow [
 				index := 1.
 				1 to: newNode children size do: [ :j | (newNode children at: index) ifNotNil: [ index := index + 1 ] ].
 				newNode children at: index put: child.
-				newNode keys at: (keys at: i) + 1 put: index ] ].
+				newNode keys at: (keys at: i) put: index ] ].
 	self become: newNode
 ]
 
@@ -61,7 +61,7 @@ ArtNode16 >> indexOf: aKey [
 		findBinaryIndex: [ :each | 
 			aKey = each
 				ifTrue: [ 0 ]
-				ifFalse: [ aKey > each
+				ifFalse: [ (each ~= 0 and: [ aKey > each ])
 						ifTrue: [ 1 ]
 						ifFalse: [ -1 ] ] ]
 		ifNone: [ 0 ]

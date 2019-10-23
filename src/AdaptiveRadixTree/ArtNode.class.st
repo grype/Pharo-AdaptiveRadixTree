@@ -48,6 +48,11 @@ ArtNode >> minimum [
 ]
 
 { #category : #accessing }
+ArtNode >> search: aKey depth: anObject [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
 ArtNode >> size [
 	"Returns number of children"
 	^ self subclassResponsibility 

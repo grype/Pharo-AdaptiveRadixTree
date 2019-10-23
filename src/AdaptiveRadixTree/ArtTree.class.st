@@ -8,7 +8,7 @@ Class {
 	#category : #'AdaptiveRadixTree-Core'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'state tracking' }
 ArtTree >> addedChildren: aCount [
 	size := size + aCount
 ]
@@ -40,7 +40,7 @@ ArtTree >> removeKey: aKey [
 	^ self notYetImplemented 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'state tracking' }
 ArtTree >> removedChildren: aCount [
 	size := size - aCount
 ]
@@ -50,9 +50,10 @@ ArtTree >> root [
 	^ root
 ]
 
-{ #category : #accessing }
+{ #category : #searching }
 ArtTree >> search: aKey [
-	^ self notYetImplemented 
+	^ root
+		ifNotNil: [ :node | node search: aKey asByteArray ensureNullTerminated depth: 1 ]
 ]
 
 { #category : #accessing }
