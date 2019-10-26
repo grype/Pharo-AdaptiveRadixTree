@@ -25,6 +25,13 @@ ArtLeafNode >> = anObject [
 ]
 
 { #category : #accessing }
+ArtLeafNode >> at: aKey depth: depth [
+	^ (self matchesKey: aKey)
+		ifTrue: [ value ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 ArtLeafNode >> at: aKey put: aValue depth: depth [
 	"Insert aValue at aKey, starting with given depth. This method is meant to be called recursively and is expected to return the inserted value"
 
@@ -105,13 +112,6 @@ ArtLeafNode >> printOn: aStream [
 { #category : #removing }
 ArtLeafNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 	^ self shouldNotImplement 
-]
-
-{ #category : #accessing }
-ArtLeafNode >> search: aKey depth: depth [
-	^ (self matchesKey: aKey)
-		ifTrue: [ value ]
-		ifFalse: [ nil ]
 ]
 
 { #category : #accessing }

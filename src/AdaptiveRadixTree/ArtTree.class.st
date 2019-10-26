@@ -13,6 +13,12 @@ ArtTree >> addedChildren: aCount [
 	size := size + aCount
 ]
 
+{ #category : #searching }
+ArtTree >> at: aKey [
+	^ root
+		ifNotNil: [ :node | node at: aKey asByteArray ensureNullTerminated depth: 1 ]
+]
+
 { #category : #accessing }
 ArtTree >> at: aKey put: aValue [
 	"Puts given value at given key. If a leaf node matching the key exists - its value is updated, otherwise - a new leaf node is created, manipulating intemediate node structure if needed. Returns inserted value"
@@ -75,12 +81,6 @@ ArtTree >> removedChildren: aCount [
 { #category : #accessing }
 ArtTree >> root [
 	^ root
-]
-
-{ #category : #searching }
-ArtTree >> search: aKey [
-	^ root
-		ifNotNil: [ :node | node search: aKey asByteArray ensureNullTerminated depth: 1 ]
 ]
 
 { #category : #accessing }

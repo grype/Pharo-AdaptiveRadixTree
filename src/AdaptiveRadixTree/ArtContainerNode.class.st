@@ -58,6 +58,17 @@ ArtContainerNode >> at: aKey [
 ]
 
 { #category : #accessing }
+ArtContainerNode >> at: aKey depth: depth [
+	^ (self prefixMismatchWith: aKey depth: depth) ~= (prefixSize + 1)
+		ifTrue: [ nil ]
+		ifFalse: [ | newDepth |
+
+			newDepth := depth + prefixSize.
+			(self at: (aKey at: newDepth))
+				ifNotNil: [ :nextNode | nextNode at: aKey depth: newDepth + 1 ] ]
+]
+
+{ #category : #accessing }
 ArtContainerNode >> at: aKey put: aValue depth: depth [
 	"Insert aValue at aKey, starting with given depth. This method is meant to be called recursively.
 	 Returns true if a node was actually added (as opposed to updating existing node)."
@@ -236,17 +247,6 @@ ArtContainerNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 						ifNotNil: [ :tree | tree removedChildren: 1 ].
 					val ]
 				ifFalse: [ next removeKey: aKey ifAbsent: absentBlock depth: currentDepth + 1 ] ]
-]
-
-{ #category : #accessing }
-ArtContainerNode >> search: aKey depth: depth [
-	^ (self prefixMismatchWith: aKey depth: depth) ~= (prefixSize + 1)
-		ifTrue: [ nil ]
-		ifFalse: [ | newDepth |
-
-			newDepth := depth + prefixSize.
-			(self at: (aKey at: newDepth))
-				ifNotNil: [ :nextNode | nextNode search: aKey depth: newDepth + 1 ] ]
 ]
 
 { #category : #adding }

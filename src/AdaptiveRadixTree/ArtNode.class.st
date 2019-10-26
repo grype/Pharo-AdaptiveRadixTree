@@ -30,6 +30,11 @@ ArtNode class >> node48 [
 ]
 
 { #category : #accessing }
+ArtNode >> at: aKey depth: anObject [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
 ArtNode >> at: aKey put: aValue depth: depth [
 	"Insert aValue at aKey, starting with given depth. This method is meant to be called recursively.
 	 Returns true if a node was actually added (as opposed to updating existing node)."
@@ -55,11 +60,6 @@ ArtNode >> minimum [
 
 { #category : #removing }
 ArtNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
-	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-ArtNode >> search: aKey depth: anObject [
 	^ self subclassResponsibility 
 ]
 
