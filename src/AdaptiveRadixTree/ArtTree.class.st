@@ -25,6 +25,7 @@ ArtTree >> at: aKey put: aValue [
 
 	| key |
 
+	(aKey size > 0) ifFalse: [ ^ self ].
 	key := aKey asByteArray ensureNullTerminated.
 	^ ArtCurrentTree
 		value: self

@@ -167,29 +167,23 @@ ArtContainerNode >> prefix: anObject [
 
 { #category : #accessing }
 ArtContainerNode >> prefixMismatchWith: aKey depth: depth [
-	| maxPrefixSize |
+	| max |
 
-	maxPrefixSize := self class maxPrefixSize.
+	max := self class maxPrefixSize min: prefixSize.
 
-	prefixSize > maxPrefixSize
-		ifTrue: [ ^ aKey
-				detectIndex: [ :byte :index | byte ~= (prefix byteAt: index) ]
-				from: depth
-				to: maxPrefixSize
-				ifNone: [ | minKey |
+	1 to: max do: [ :i | 
+		(aKey at: depth - 1 + i) = (prefix at: i)
+			ifFalse: [ ^ i ] ].
 
-					minKey := self minimum key.
-					aKey
-						detectIndex: [ :byte :index | byte ~= (minKey at: index) ]
-						from: depth
-						to: prefixSize
-						ifNone: [ prefixSize ] ] ]
-		ifFalse: [ ^ aKey
-				detectIndex: [ :byte :index | 
-					byte ~= (prefix byteAt: index) ]
-				from: depth
-				to: prefixSize
-				ifNone: [ prefixSize + 1 ] ]
+	prefixSize > self class maxPrefixSize
+		ifTrue: [ | minKey |
+
+			minKey := self minimum key.
+			max to: minKey size do: [ :i | 
+				(minKey at: depth - 1 + i) = (aKey at: depth - 1 + i)
+					ifFalse: [ ^ i ] ] ].
+
+	^ prefixSize + 1
 ]
 
 { #category : #accessing }
@@ -293,22 +287,27 @@ ArtContainerNode >> splitAtPrefixIndex: anIndex depth: depth [
 
 	nextNode := ArtNode node4.
 	self become: nextNode.
-
-	prefix := originalPrefix copyFrom: 1 to: anIndex - 1.
+	
+	fullPrefix := originalPrefix.
+	nextPrefixStart := anIndex.
+	originalPrefixSize > self class maxPrefixSize
+		ifTrue: [ fullPrefix := nextNode minimum key.
+			nextPrefixStart := depth - 1 + anIndex ].
+		
+	prefix := fullPrefix copyFrom: 1 to: nextPrefixStart - 1.
 	prefixSize := anIndex - 1.
 
 	nextNode prefixSize: nextNode prefixSize - anIndex.
-
-	fullPrefix := originalPrefix.
-	nextPrefixStart := anIndex.
-	originalPrefixSize < self class maxPrefixSize
-		ifFalse: [ fullPrefix := nextNode minimum key.
-			nextPrefixStart := depth - 1 + anIndex ].
 
 	self addChild: nextNode at: (fullPrefix byteAt: nextPrefixStart).
 	nextNode
 		prefix:
 			(fullPrefix
 				copyFrom: nextPrefixStart
-				to: nextPrefixStart + nextNode prefixSize - 1)
+				to: nextPrefixStart + nextNode prefixSize - 1).
+
+	nextNode prefixSize > nextNode prefix size
+		ifTrue: [ self halt ].
+	prefixSize > prefix size
+		ifTrue: [ self halt ]
 ]

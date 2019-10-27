@@ -48,12 +48,12 @@ ArtLeafNode >> at: aKey put: aValue depth: depth [
 		prefix:
 			(aKey
 				copyFrom: depth
-				to: ((depth + lcp - 1) min: ArtContainerNode maxPrefixSize));
+				to: depth - 1 + (lcp min: ArtContainerNode maxPrefixSize));
 		prefixSize: lcp.
 
 	self become: newContainer.
 	self addChild: newContainer at: (newContainer key at: depth + lcp).
-	self addChild: newLeaf at: (newLeaf key at: depth + lcp).
+	self addChild: newLeaf at: (aKey at: depth + lcp).
 
 	ArtCurrentTree value ifNotNil: [ :tree | tree addedChildren: 1 ].
 	^ aValue
