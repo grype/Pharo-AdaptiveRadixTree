@@ -12,18 +12,13 @@ ArtLeafNodeTest >> testAtPutDepth [
 ]
 
 { #category : #tests }
-ArtLeafNodeTest >> testInitializeWithKeyValue [
-	| node |
-	node := ArtLeafNode key: 'def' value: 'DEF'.
-	node key should equal: 'def' asByteArray.
-	node value should equal: 'DEF'
-]
-
-{ #category : #tests }
 ArtLeafNodeTest >> testMatchesKey [
 	| node |
 
-	node := ArtLeafNode key: 'hello' value: 'world'.
+	node := ArtLeafNode new
+		key: 'hello' asByteArray ensureNullTerminated;
+		value: 'world';
+		yourself.
 	(node matchesKey: 'hello') should be: true.
 	(node matchesKey: ' hello') should be: false.
 	(node matchesKey: 'h') should be: false.
@@ -32,17 +27,23 @@ ArtLeafNodeTest >> testMatchesKey [
 
 { #category : #tests }
 ArtLeafNodeTest >> testPutAtEnd [
-	| node leaf2 leaf1 |
+	| node leaf2 leaf1 tree |
 
-	node := ArtLeafNode
-		key: 'abc' asByteArray ensureNullTerminated
-		value: 'ABC'.
+	tree := ArtTree new.
+	node := (ArtLeafNode on: tree)
+		key: 'abc' asByteArray ensureNullTerminated;
+		value: 'ABC';
+		parent: tree;
+		yourself.
 	leaf1 := node copy.
-	leaf2 := ArtLeafNode
-		key: 'abcd' asByteArray ensureNullTerminated
-		value: 'abcd'.
+	leaf2 := (ArtLeafNode on: tree)
+		key: 'abcd' asByteArray ensureNullTerminated;
+		value: 'abcd';
+		yourself.
 
+	tree initializeWithRoot: node.
 	node at: leaf2 key put: leaf2 value depth: 1.
+	node := tree root.
 	node should beKindOf: ArtNode4.
 	node size should equal: 2.
 
@@ -51,7 +52,7 @@ ArtLeafNodeTest >> testPutAtEnd [
 	node children first should equal: leaf1.
 	node children second should equal: leaf2.
 
-	node prefix should equal: 'abc' asByteArray.
+	(node prefix copyFrom: 1 to: node prefixSize) should equal: 'abc' asByteArray.
 	node prefixSize should equal: 3.
 
 	(node keys at: 1) should equal: leaf1 key fourth.
@@ -63,17 +64,23 @@ ArtLeafNodeTest >> testPutAtEnd [
 
 { #category : #tests }
 ArtLeafNodeTest >> testPutAtMiddle [
-	| node leaf2 leaf1 |
+	| node leaf2 leaf1 tree |
 
-	node := ArtLeafNode
-		key: 'abc' asByteArray ensureNullTerminated
-		value: 'ABC'.
+	tree := ArtTree new.
+	node := (ArtLeafNode on: tree)
+		key: 'abc' asByteArray ensureNullTerminated;
+		value: 'ABC';
+		parent: tree;
+		yourself.
 	leaf1 := node copy.
-	leaf2 := ArtLeafNode
-		key: 'abd' asByteArray ensureNullTerminated
-		value: 'ABD'.
+	leaf2 := (ArtLeafNode on: tree)
+		key: 'abd' asByteArray ensureNullTerminated;
+		value: 'ABD';
+		yourself.
 
+	tree initializeWithRoot: node.
 	node at: leaf2 key put: leaf2 value depth: 1.
+	node := tree root.
 	node should beKindOf: ArtNode4.
 	node size should equal: 2.
 
@@ -82,7 +89,7 @@ ArtLeafNodeTest >> testPutAtMiddle [
 	node children first should equal: leaf1.
 	node children second should equal: leaf2.
 
-	node prefix should equal: 'ab' asByteArray.
+	(node prefix copyFrom: 1 to: node prefixSize) should equal: 'ab' asByteArray.
 	node prefixSize should equal: 2.
 
 	(node keys at: 1) should equal: leaf1 key third.
@@ -94,17 +101,23 @@ ArtLeafNodeTest >> testPutAtMiddle [
 
 { #category : #tests }
 ArtLeafNodeTest >> testPutAtStart [
-	| node leaf2 leaf1 |
+	| node leaf2 leaf1 tree |
 
-	node := ArtLeafNode
-		key: 'abc' asByteArray ensureNullTerminated
-		value: 'ABC'.
+	tree := ArtTree new.
+	node := (ArtLeafNode on: tree)
+		key: 'abc' asByteArray ensureNullTerminated;
+		value: 'ABC';
+		parent: tree;
+		yourself.
 	leaf1 := node copy.
-	leaf2 := ArtLeafNode
-		key: 'def' asByteArray ensureNullTerminated
-		value: 'DEF'.
+	leaf2 := (ArtLeafNode on: tree)
+		key: 'def' asByteArray ensureNullTerminated;
+		value: 'DEF';
+		yourself.
 
+	tree initializeWithRoot: node.
 	node at: leaf2 key put: leaf2 value depth: 1.
+	node := tree root.
 	node should beKindOf: ArtNode4.
 	node size should equal: 2.
 
@@ -113,7 +126,7 @@ ArtLeafNodeTest >> testPutAtStart [
 	node children first should equal: leaf1.
 	node children second should equal: leaf2.
 
-	node prefix should equal: ByteArray new.
+	(node prefix copyFrom: 1 to: node prefixSize) should equal: ByteArray new.
 	node prefixSize should equal: 0.
 
 	(node keys at: 1) should equal: leaf1 key first.

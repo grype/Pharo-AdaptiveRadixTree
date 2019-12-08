@@ -24,30 +24,35 @@ ArtNode48 >> addChild: aChildNode at: aByte [
 	| index |
 
 	self isFull
-		ifTrue: [ self grow.
-			^ self addChild: aChildNode at: aByte ].
+		ifTrue: [ ^ self grow addChild: aChildNode at: aByte ].
 
 	index := children detectIndex: [ :child | child isNil ].
 	children at: index put: aChildNode.
-	keys at: aByte put: index.
+	keys byteAt: aByte + 1 put: index.
+	aChildNode parent: self.
 	size := size + 1.
 	^ aChildNode
 ]
 
 { #category : #testing }
 ArtNode48 >> grow [
-	| newNode |
+	| newNode newChildren |
 
-	newNode := ArtNode node256.
+	newNode := ArtNode256 on: tree.
 	newNode copyMetaFrom: self.
-	1 to: keys size do:
-		[ :i | (self at: i) ifNotNil: [ :child | newNode children at: i put: child ] ].
-	self become: newNode
+	newChildren := newNode children.
+	1 to: keys size do: [ :i | 
+		(self at: i - 1)
+			ifNotNil: [ :child | 
+				child parent: newNode.
+				newChildren at: i put: child ] ].
+	parent replaceChild: self with: newNode.
+	^ newNode
 ]
 
 { #category : #accessing }
 ArtNode48 >> indexOf: aKey [
-	^ keys at: aKey
+	^ keys at: aKey + 1 ifAbsent: [ 0 ]
 ]
 
 { #category : #accessing }
@@ -83,7 +88,7 @@ ArtNode48 >> removeChildAt: aByte [
 	index > 0
 		ifFalse: [ ^ answer ].
 
-	keys byteAt: aByte put: 0.
+	keys at: aByte put: 0.
 	answer := children at: index.
 	children at: index put: nil.
 

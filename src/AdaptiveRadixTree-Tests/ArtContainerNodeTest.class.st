@@ -6,56 +6,81 @@ Class {
 
 { #category : #tests }
 ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
-	| node |
+	| node parent newNode leaf |
+
+	parent := ArtTree new.
 
 	node := ArtNode4 new.
+	node parent: parent.
 	node prefix: 'an' asByteArray.
 	node prefixSize: 2.
-	node splitAtPrefixIndex: 2 depth: 1.
-	node should beKindOf: ArtNode4.
-	node prefix should equal: 'a' asByteArray.
-	node prefixSize should equal: 1.
-
-	node := ArtNode4 new.
-	node prefix: 'an' asByteArray.
-	node prefixSize: 2.
-	node splitAtPrefixIndex: 1 depth: 1.
-	node should beKindOf: ArtNode4.
+	newNode := node splitAtPrefixIndex: 2 depth: 1.
+	newNode should beKindOf: ArtNode4.
+	newNode parent should be: parent.
+	node parent should be: newNode.
+	newNode prefix should equal: 'a' asByteArray.
+	newNode prefixSize should equal: 1.
 	node prefixSize should equal: 0.
 
 	node := ArtNode4 new.
-	node prefix: 'anddd' asByteArray.
-	node prefixSize: 2.
-	node splitAtPrefixIndex: 2 depth: 1.
-	node should beKindOf: ArtNode4.
-	node prefix should equal: 'a' asByteArray.
-	node prefixSize should equal: 1.
-	
-	node := ArtNode4 new.
+	node parent: parent.
 	node prefix: 'an' asByteArray.
 	node prefixSize: 2.
-	node splitAtPrefixIndex: 2 depth: 100.
-	node should beKindOf: ArtNode4.
-	node prefix should equal: 'a' asByteArray.
+	newNode := node splitAtPrefixIndex: 1 depth: 1.
+	newNode should beKindOf: ArtNode4.
+	newNode prefixSize should equal: 0.
+	(newNode keys at: 1) should equal: $a asInteger.
 	node prefixSize should equal: 1.
-	
-	node := ArtNode16 new.
-	node prefix: 'anddd' asByteArray.
-	node prefixSize: 2.
-	node splitAtPrefixIndex: 2 depth: 1.
-	node should beKindOf: ArtNode4.
-	node prefix should equal: 'a' asByteArray.
-	node prefixSize should equal: 1.
-	
+	(node prefix at: 1) should equal: $n asInteger.
 
 	node := ArtNode4 new.
-	node prefix: 'abcdefghij' asByteArray.
-	node prefixSize: 12.
-	node children at: 1 put: (ArtLeafNode key: 'abcdefghijkl' value: 'End node').
-	node splitAtPrefixIndex: 2 depth: 1.
-	node should beKindOf: ArtNode4.
-	node prefix should equal: 'a' asByteArray.
-	node prefixSize should equal: 1.
+	node parent: parent.
+	node prefix: 'anddd' asByteArray.
+	node prefixSize: 2.
+	newNode := node splitAtPrefixIndex: 2 depth: 1.
+	newNode should beKindOf: ArtNode4.
+	newNode prefix should equal: 'a' asByteArray.
+	newNode prefixSize should equal: 1.
+	node prefixSize should equal: 0.
+
+	node := ArtNode4 new.
+	node parent: parent.
+	node prefix: 'an' asByteArray.
+	node prefixSize: 2.
+	newNode := node splitAtPrefixIndex: 2 depth: 100.
+	newNode should beKindOf: ArtNode4.
+	newNode prefix should equal: 'a' asByteArray.
+	newNode prefixSize should equal: 1.
+	node prefixSize should equal: 0.
+
+	node := ArtNode16 new.
+	node parent: parent.
+	node prefix: 'anddd' asByteArray.
+	node prefixSize: 2.
+	newNode := node splitAtPrefixIndex: 2 depth: 1.
+	newNode should beKindOf: ArtNode4.
+	newNode prefix should equal: 'a' asByteArray.
+	newNode prefixSize should equal: 1.
+	node prefixSize should equal: 0.
+
+	leaf := ArtLeafNode new
+		key: 'abcdefghijkl' asByteArray ensureNullTerminated;
+		value: 'End node';
+		yourself.
+	node := ArtNode4 new.
+	node parent: parent.
+	node prefix: (leaf key asByteArray first: ArtNode4 maxPrefixSize).
+	node prefixSize: 11.
+	node keys at: 1 put: (leaf key at: 12).
+	node children at: 1 put: leaf.
+	newNode := node splitAtPrefixIndex: 2 depth: 1.
+	newNode should beKindOf: ArtNode4.
+	newNode prefix should equal: 'a' asByteArray.
+	newNode prefixSize should equal: 1.
+	(newNode keys at: 1) should equal: (leaf key at: 2).
+	node prefixSize should equal: 9.
+	(node prefix first: 9) should
+		equal: (leaf key copyFrom: 3 to: leaf key size - 2)
 ]
 
 { #category : #tests }

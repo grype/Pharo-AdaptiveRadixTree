@@ -21,10 +21,8 @@ ArtNode256 class >> minSize [
 
 { #category : #adding }
 ArtNode256 >> addChild: aChildNode at: aByte [
-	self isFull
-		ifTrue: [ ArtAddChildError signal: 'Tried to add a child to a node that is full and cannot grow' node: self.
-			^ nil ].
-	children at: aByte put: aChildNode.
+	children at: aByte + 1 put: aChildNode.
+	aChildNode parent: self.
 	size := size + 1.
 	^ aChildNode
 ]
@@ -37,7 +35,15 @@ ArtNode256 >> grow [
 
 { #category : #accessing }
 ArtNode256 >> indexOf: aKey [
-	^ aKey
+	^ aKey + 1
+]
+
+{ #category : #accessing }
+ArtNode256 >> maximum [
+	(children size to: 1 by: -1)
+		do: [ :i | (children at: i) ifNotNil: [ :node | node maximum ] ].
+		
+	^ nil
 ]
 
 { #category : #accessing }

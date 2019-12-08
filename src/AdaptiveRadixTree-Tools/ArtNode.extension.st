@@ -54,7 +54,7 @@ ArtNode class >> gtMapViewBuilder [
 				ifTrue: [ node key allButLast asString , ':' , node value ]
 				ifFalse: [ node prefixSize > 0
 						ifTrue: [ node prefixSize > node class maxPrefixSize
-								ifTrue: [ (node prefix copyFrom: 1 to: node class maxPrefixSize) , '+' ]
+								ifTrue: [ (node prefix copyFrom: 1 to: node class maxPrefixSize) asString , '+' ]
 								ifFalse: [ node prefix copyFrom: 1 to: node prefixSize ] ]
 						ifFalse: [ '' ] ] ].
 	b rightward.

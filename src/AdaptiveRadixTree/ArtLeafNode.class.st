@@ -8,11 +8,6 @@ Class {
 	#category : #'AdaptiveRadixTree-Core'
 }
 
-{ #category : #accessing }
-ArtLeafNode class >> key: aKey value: aValue [
-	^ self basicNew initializeWithKey: aKey value: aValue
-]
-
 { #category : #comparing }
 ArtLeafNode >> = anObject [
 	"Answer whether the receiver and anObject represent the same object."
@@ -35,28 +30,32 @@ ArtLeafNode >> at: aKey depth: depth [
 ArtLeafNode >> at: aKey put: aValue depth: depth [
 	"Insert aValue at aKey, starting with given depth. This method is meant to be called recursively and is expected to return the inserted value"
 
-	| newLeaf newContainer lcp |
+	| newLeaf newContainer lcp newContainerPrefix |
 
 	(self matchesKey: aKey)
 		ifTrue: [ self value: aValue.
 			^ false ].
 
-	newLeaf := ArtNode leafWithKey: aKey value: aValue.
-	newContainer := ArtNode node4.
+	newContainer := ArtNode4 on: tree.
+	newLeaf := (ArtLeafNode on: tree)
+		key: aKey;
+		value: aValue;
+		yourself.
 	lcp := key longestCommonPrefixWith: aKey startingAt: depth.
-	newContainer
-		prefix:
-			(aKey
-				copyFrom: depth
-				to: depth - 1 + (lcp min: ArtContainerNode maxPrefixSize));
-		prefixSize: lcp.
+	newContainerPrefix := newContainer prefix.
+	1 to: (lcp min: ArtContainerNode maxPrefixSize) do: [ :i | newContainerPrefix at: i put: (aKey at: depth - 1 + i) ].
+	newContainer prefixSize: lcp.
 
-	self become: newContainer.
-	self addChild: newContainer at: (newContainer key at: depth + lcp).
-	self addChild: newLeaf at: (aKey at: depth + lcp).
-
-	ArtCurrentTree value ifNotNil: [ :tree | tree addedChildren: 1 ].
+	parent replaceChild: self with: newContainer.
+	newContainer addChild: self at: (self key at: depth + lcp).
+	newContainer addChild: newLeaf at: (aKey at: depth + lcp).
+	tree addedChildren: 1.
 	^ aValue
+]
+
+{ #category : #enumerating }
+ArtLeafNode >> do: aBlock [
+	aBlock cull: self
 ]
 
 { #category : #comparing }
@@ -64,13 +63,6 @@ ArtLeafNode >> hash [
 	"Answer an integer value that is related to the identity of the receiver."
 
 	^ value hash bitXor: key hash
-]
-
-{ #category : #initialization }
-ArtLeafNode >> initializeWithKey: aKey value: aValue [
-	self initialize.
-	key := aKey asByteArray copy.
-	value := aValue
 ]
 
 { #category : #testing }
@@ -83,9 +75,20 @@ ArtLeafNode >> key [
 	^ key
 ]
 
+{ #category : #accessing }
+ArtLeafNode >> key: anObject [
+	key := anObject
+]
+
+{ #category : #private }
+ArtLeafNode >> leafNodes [
+	^ {self}
+]
+
 { #category : #testing }
 ArtLeafNode >> matchesKey: aKey [
-	^ aKey isNotNil and: [ aKey asByteArray = key ]
+	aKey ifEmpty: [ ^ false ].
+	^ aKey isNotNil and: [ aKey asByteArray ensureNullTerminated = key ]
 ]
 
 { #category : #accessing }
@@ -97,6 +100,13 @@ ArtLeafNode >> maximum [
 ArtLeafNode >> minimum [
 	"Returns the left-most leaf node by recursively traversing children using lowest byte index"
 	^ self
+]
+
+{ #category : #accessing }
+ArtLeafNode >> nodeAt: aKey depth: depth [
+	^ (self matchesKey: aKey)
+		ifTrue: [ self ]
+		ifFalse: [ nil ]
 ]
 
 { #category : #printing }
@@ -117,6 +127,11 @@ ArtLeafNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 { #category : #accessing }
 ArtLeafNode >> size [
 	^ 0
+]
+
+{ #category : #accessing }
+ArtLeafNode >> totalSizeInMemory [
+	^ self sizeInMemory + key sizeInMemory + value sizeInMemory
 ]
 
 { #category : #accessing }

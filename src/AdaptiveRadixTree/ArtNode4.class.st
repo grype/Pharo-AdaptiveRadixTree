@@ -5,6 +5,11 @@ Class {
 }
 
 { #category : #accessing }
+ArtNode4 class >> maxKeySize [
+	^ 4
+]
+
+{ #category : #accessing }
 ArtNode4 class >> maxSize [
 	^ 4
 ]
@@ -18,36 +23,35 @@ ArtNode4 class >> minSize [
 ArtNode4 >> addChild: aChildNode at: aByte [
 	| index |
 
-	self isFull
-		ifTrue: [ self grow.
-			^ self addChild: aChildNode at: aByte ].
-
 	index := 1.
+	self isFull
+		ifTrue: [ ^ self grow addChild: aChildNode at: aByte ]
+		ifFalse: [ [ index <= size and: [ aByte >= (keys at: index) ] ]
+				whileTrue: [ index := index + 1 ] ].
 
-	self isEmpty
-		ifFalse: [ index := keys
-				detectIndex: [ :each :i | aByte < each ]
-				from: 1
-				to: size
-				ifNone: [ size + 1 ].
-			self shiftChildrenLargerThan: aByte from: index ].
-
+	size >= index
+		ifTrue: [ keys shiftRight: 1 from: index to: size.
+			children shiftRight: 1 from: index to: size ].
 	keys byteAt: index put: aByte.
 	children at: index put: aChildNode.
+	aChildNode parent: self.
 	size := size + 1.
 	^ aChildNode
 ]
 
 { #category : #testing }
 ArtNode4 >> grow [
-	| newNode |
+	| newNode newKeys newChildren |
 
-	newNode := ArtNode node16.
+	newNode := ArtNode16 on: tree.
 	newNode copyMetaFrom: self.
+	parent replaceChild: self with: newNode.
+	newKeys := newNode keys.
+	newChildren := newNode children.
 	1 to: size do: [ :i | 
-		newNode keys at: i put: (keys at: i).
-		newNode children at: i put: (children at: i) ].
-	self become: newNode
+		newKeys byteAt: i put: (keys at: i).
+		(newChildren at: i put: (children at: i)) parent: newNode ].
+	^ newNode
 ]
 
 { #category : #comparing }
@@ -83,12 +87,10 @@ ArtNode4 >> removeChildAt: aByte [
 	index > 0
 		ifFalse: [ ^ answer ].
 
-	keys byteAt: index put: 0.
 	answer := children at: index.
-	children at: index put: nil.
 
-	self shiftKeysAtIndex: index.
-	self shiftChildrenAt: index.
+	keys shiftLeft: 1 from: index + 1 to: size.
+	children shiftLeft: 1 from: index + 1 to: size.
 
 	size := size - 1.
 	size < self class minSize
@@ -122,5 +124,5 @@ ArtNode4 >> shrink [
 						copyFrom: 1
 						to: (currentPrefixSize min: self class maxPrefixSize)).
 			newNode prefixSize: newNode prefixSize + prefixSize + 1 ].
-	self become: newNode
+	parent replaceChild: self with: newNode
 ]

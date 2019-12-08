@@ -4,7 +4,7 @@ Extension { #name : #ArtNode48 }
 ArtNode48 >> childrenWithKeys [
 	^ (keys asOrderedCollection
 		collectWithIndex: [ :key :index | 
-			index
+			index - 1
 				->
 					(key > 0
 						ifTrue: [ children at: key ]

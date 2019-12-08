@@ -13,10 +13,25 @@ ArtTree >> addedChildren: aCount [
 	size := size + aCount
 ]
 
-{ #category : #searching }
+{ #category : #accessing }
+ArtTree >> allLeafNodes [
+	^ root ifNotNil: [ :node | node allLeafNodes ]
+]
+
+{ #category : #accessing }
 ArtTree >> at: aKey [
 	^ root
 		ifNotNil: [ :node | node at: aKey asByteArray ensureNullTerminated depth: 1 ]
+]
+
+{ #category : #accessing }
+ArtTree >> at: aKey ifAbsent: absentBlock [
+	^ self notYetImplemented 
+]
+
+{ #category : #accessing }
+ArtTree >> at: aKey ifPresent: presentBlock ifAbsent: absentBlock [
+	^ self notYetImplemented
 ]
 
 { #category : #accessing }
@@ -25,15 +40,24 @@ ArtTree >> at: aKey put: aValue [
 
 	| key |
 
-	(aKey size > 0) ifFalse: [ ^ self ].
+	aKey size > 0
+		ifFalse: [ ^ self ].
 	key := aKey asByteArray ensureNullTerminated.
-	^ ArtCurrentTree
-		value: self
-		during: [ root
-				ifNil: [ root := ArtNode leafWithKey: key value: aValue.
-					size := size + 1.
-					aValue ]
-				ifNotNil: [ root at: key put: aValue depth: 1 ] ]
+	^ root
+		ifNil: [ root := (ArtLeafNode on: self)
+				key: key;
+				value: aValue;
+				parent: self;
+				yourself.
+			size := size + 1.
+			aValue ]
+		ifNotNil: [ root at: key put: aValue depth: 1 ]
+]
+
+{ #category : #enumerating }
+ArtTree >> do: aBlock [
+	root ifNil: [ ^ self ].
+	root do: aBlock
 ]
 
 { #category : #accessing }
@@ -48,7 +72,13 @@ ArtTree >> initialize [
 	size := 0
 ]
 
-{ #category : #accessing }
+{ #category : #'private-accessing' }
+ArtTree >> nodeAt: aKey [
+	^ root
+		ifNotNil: [ :node | node nodeAt: aKey asByteArray ensureNullTerminated depth: 1 ]
+]
+
+{ #category : #removing }
 ArtTree >> removeKey: aKey [
 	^ self removeKey: aKey ifAbsent: [ self errorKeyNotFound: aKey ]
 ]
@@ -77,6 +107,12 @@ ArtTree >> removeKey: aKey ifAbsent: absentBlock [
 { #category : #'state tracking' }
 ArtTree >> removedChildren: aCount [
 	size := size - aCount
+]
+
+{ #category : #private }
+ArtTree >> replaceChild: aChild with: aNewChild [
+	root := aNewChild.
+	aNewChild parent: self.
 ]
 
 { #category : #accessing }

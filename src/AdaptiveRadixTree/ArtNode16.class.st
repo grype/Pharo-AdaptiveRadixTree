@@ -23,41 +23,47 @@ ArtNode16 class >> minSize [
 ArtNode16 >> addChild: aChildNode at: aByte [
 	| index |
 
-	self isFull
-		ifTrue: [ self grow.
-			^ self addChild: aChildNode at: aByte ].
-
 	index := 1.
-
-	self isEmpty
+	self isFull
+		ifTrue: [ ^ self grow addChild: aChildNode at: aByte ]
 		ifFalse: [ index := keys
 				findBinaryIndex: [ :byte | 
-					byte >= aByte
-						ifTrue: [ 0 ]
-						ifFalse: [ -1 ] ]
-				ifNone: [ size + 1 ].
-			self shiftChildrenLargerThan: aByte from: index ].
+					(byte > aByte)
+						ifTrue: [ -1 ]
+						ifFalse: [ 1 ] ]
+				from: 1
+				to: self size
+				do: [ :found | found ]
+				ifNone: [ :low :high | high ].
+			index <= size
+				ifTrue: [ 
+					self shiftChildrenLargerThan: aByte from: index
+					] ].
 
 	keys byteAt: index put: aByte.
 	children at: index put: aChildNode.
+	aChildNode parent: self.
 	size := size + 1.
 	^ aChildNode
 ]
 
 { #category : #testing }
 ArtNode16 >> grow [
-	| newNode index |
+	| newNode index newKeys newChildren |
 
-	newNode := ArtNode node48.
+	newNode := ArtNode48 on: tree.
 	newNode copyMetaFrom: self.
+	parent replaceChild: self with: newNode.
+	newKeys := newNode keys.
+	newChildren := newNode children.
 	1 to: self size do: [ :i | 
-		(self at: i)
+		(children at: i)
 			ifNotNil: [ :child | 
 				index := 1.
 				1 to: newNode children size do: [ :j | (newNode children at: index) ifNotNil: [ index := index + 1 ] ].
-				newNode children at: index put: child.
-				newNode keys at: (keys at: i) put: index ] ].
-	self become: newNode
+				(newChildren at: index put: child) parent: newNode.
+				newKeys byteAt: (keys at: i) + 1 put: index ] ].
+	^ newNode
 ]
 
 { #category : #accessing }
@@ -66,9 +72,12 @@ ArtNode16 >> indexOf: aKey [
 		findBinaryIndex: [ :each | 
 			aKey = each
 				ifTrue: [ 0 ]
-				ifFalse: [ (each ~= 0 and: [ aKey > each ])
+				ifFalse: [ (aKey > each)
 						ifTrue: [ 1 ]
 						ifFalse: [ -1 ] ] ]
+		from: 1
+		to: self size
+		do: [ :found | found ]
 		ifNone: [ 0 ]
 ]
 
@@ -93,12 +102,10 @@ ArtNode16 >> removeChildAt: aByte [
 	index > 0
 		ifFalse: [ ^ answer ].
 
-	keys byteAt: index put: 0.
 	answer := children at: index.
-	children at: index put: nil.
 
-	self shiftKeysAtIndex: index.
-	self shiftChildrenAt: index.
+	keys shiftLeft: 1 from: index + 1 to: size.
+	children shiftLeft: 1 from: index + 1 to: size.
 
 	size := size - 1.
 	^ answer

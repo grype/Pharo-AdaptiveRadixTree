@@ -1,32 +1,18 @@
 Class {
 	#name : #ArtNode,
 	#superclass : #Object,
+	#instVars : [
+		'tree',
+		'parent'
+	],
 	#category : #'AdaptiveRadixTree-Core'
 }
 
-{ #category : #accessing }
-ArtNode class >> leafWithKey: aKey value: aValue [
-	^ ArtLeafNode key: aKey value: aValue
-]
-
 { #category : #'instance creation' }
-ArtNode class >> node16 [
-	^ ArtNode16 new
-]
-
-{ #category : #'instance creation' }
-ArtNode class >> node256 [
-	^ ArtNode256 new
-]
-
-{ #category : #'instance creation' }
-ArtNode class >> node4 [
-	^ ArtNode4 new
-]
-
-{ #category : #'instance creation' }
-ArtNode class >> node48 [
-	^ ArtNode48 new
+ArtNode class >> on: aTree [
+	^ self new
+		tree: aTree;
+		yourself
 ]
 
 { #category : #accessing }
@@ -46,6 +32,11 @@ ArtNode >> isLeaf [
 	^ false
 ]
 
+{ #category : #private }
+ArtNode >> leafNodes [
+	^ self subclassResponsibility 
+]
+
 { #category : #accessing }
 ArtNode >> maximum [
 	"Returns the right-most leaf node by recursively traversing children using highest byte index"
@@ -58,6 +49,21 @@ ArtNode >> minimum [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+ArtNode >> nodeAt: aKey depth: anObject [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+ArtNode >> parent [
+	^ parent
+]
+
+{ #category : #accessing }
+ArtNode >> parent: anObject [
+	parent := anObject
+]
+
 { #category : #removing }
 ArtNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 	^ self subclassResponsibility 
@@ -67,4 +73,19 @@ ArtNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 ArtNode >> size [
 	"Returns number of children"
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+ArtNode >> totalSizeInMemory [
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+ArtNode >> tree [
+	^ tree
+]
+
+{ #category : #accessing }
+ArtNode >> tree: anObject [
+	tree := anObject
 ]
