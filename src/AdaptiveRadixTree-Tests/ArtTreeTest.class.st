@@ -231,6 +231,14 @@ ArtTreeTest >> testInsertMany [
 ]
 
 { #category : #tests }
+ArtTreeTest >> testInsertRemove1 [
+	tree at: 'abc' put: 'ABC'.
+	tree removeKey: 'abc'.
+	tree size should equal: 0.
+	tree root should be: nil.
+]
+
+{ #category : #tests }
 ArtTreeTest >> testInsertTwice [
 	| root firstChild secondChild thirdChild |
 

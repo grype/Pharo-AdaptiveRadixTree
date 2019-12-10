@@ -1,37 +1,100 @@
 Class {
 	#name : #ArtTree,
-	#superclass : #Object,
+	#superclass : #Dictionary,
 	#instVars : [
-		'root',
-		'size'
+		'root'
 	],
 	#category : #'AdaptiveRadixTree-Core'
 }
 
-{ #category : #'state tracking' }
-ArtTree >> addedChildren: aCount [
-	size := size + aCount
+{ #category : #'instance creation' }
+ArtTree class >> newFrom: aCollection [
+	"Answer an instance of me containing the same elements as aCollection."
+	| newCollection |
+	newCollection := self new.
+	newCollection addAll: aCollection.
+	^ newCollection
+"
+	ArtTree newFrom: {1. 2. 3}
+	{1. 2. 3} as: ArtTree
+"
+]
+
+{ #category : #'instance creation' }
+ArtTree class >> withAll: aCollection [
+	"Create a new collection containing all the elements from aCollection."
+
+	^ (self new)
+		addAll: aCollection;
+		yourself
+]
+
+{ #category : #adding }
+ArtTree >> add: anAssociation [
+	self at: anAssociation key put: anAssociation value
+]
+
+{ #category : #converting }
+ArtTree >> asArtTree [
+	^ self species == ArtTree
+		ifTrue: [ self ]
+		ifFalse: [ super asArtTree ]
+]
+
+{ #category : #adding }
+ArtTree >> associationAt: key ifAbsent: aBlock [
+	^ (self nodeAt: key)
+		ifNil: [ aBlock value ]
+		ifNotNil: [ :node | node key -> node value ]
+]
+
+{ #category : #adding }
+ArtTree >> associationAt: key ifPresent: aBlock [
+	^ (self nodeAt: key)
+		ifNotNil: [ :node | aBlock cull: node key -> node value ]
+]
+
+{ #category : #enumerating }
+ArtTree >> associationsDo: aBlock [
+	root ifNil: [ ^ self ].
+	root associationsDo: aBlock
+]
+
+{ #category : #'nested dictionaries' }
+ArtTree >> at: firstKey at: secondKey [
+	^ self shouldNotImplement 
+]
+
+{ #category : #'nested dictionaries' }
+ArtTree >> at: firstKey at: secondKey ifAbsent: aZeroArgBlock [
+	^ self shouldNotImplement 
+]
+
+{ #category : #'nested dictionaries' }
+ArtTree >> at: firstKey at: secondKey ifAbsentPut: aZeroArgBlock [
+	^ self shouldNotImplement 
+]
+
+{ #category : #'nested dictionaries' }
+ArtTree >> at: firstKey at: secondKey put: aValue [
+	^ self shouldNotImplement 
 ]
 
 { #category : #accessing }
-ArtTree >> allLeafNodes [
-	^ root ifNotNil: [ :node | node allLeafNodes ]
+ArtTree >> at: key ifAbsent: aBlock [
+	^ (root
+		ifNotNil: [ :node | node at: key asByteArray ensureNullTerminated depth: 1 ])
+		ifNil: [ aBlock value ]
 ]
 
 { #category : #accessing }
-ArtTree >> at: aKey [
-	^ root
-		ifNotNil: [ :node | node at: aKey asByteArray ensureNullTerminated depth: 1 ]
+ArtTree >> at: aKey ifAbsentPut: aBlock [
+	^ self at: aKey ifAbsent: [ self at: aKey put: aBlock value ]
 ]
 
 { #category : #accessing }
-ArtTree >> at: aKey ifAbsent: absentBlock [
-	^ self notYetImplemented 
-]
-
-{ #category : #accessing }
-ArtTree >> at: aKey ifPresent: presentBlock ifAbsent: absentBlock [
-	^ self notYetImplemented
+ArtTree >> at: aKey ifPresent: aBlock [
+	^ (root ifNotNil: [ :node | node at: aKey ]) ifNotNil: aBlock
 ]
 
 { #category : #accessing }
@@ -49,33 +112,76 @@ ArtTree >> at: aKey put: aValue [
 				value: aValue;
 				parent: self;
 				yourself.
-			size := size + 1.
+			tally := tally + 1.
 			aValue ]
 		ifNotNil: [ root at: key put: aValue depth: 1 ]
 ]
 
-{ #category : #enumerating }
-ArtTree >> do: aBlock [
-	root ifNil: [ ^ self ].
-	root do: aBlock
+{ #category : #removing }
+ArtTree >> fixCollisionsFrom: start [
+
 ]
 
-{ #category : #accessing }
-ArtTree >> errorKeyNotFound: aKey [
+{ #category : #enumerating }
+ArtTree >> flatCollect: aBlock [ 
+	^ self flatCollect: aBlock as: OrderedCollection
+]
 
-	KeyNotFound signalFor: aKey
+{ #category : #testing }
+ArtTree >> includesKey: key [
+	^ (self at: key) ifNil: [ false ] ifNotNil: [ true ]
 ]
 
 { #category : #initialization }
 ArtTree >> initialize [
 	super initialize.
-	size := 0
+	tally := 0
+]
+
+{ #category : #'rectangle functions' }
+ArtTree >> intersection: aCollection [
+	| other result duplicates |
+
+	other := aCollection asSet.
+	duplicates := Set new.
+	result := self class new: self size.
+
+	self
+		keysAndValuesDo: [ :key :value | 
+			((other includes: value) and: [ (duplicates includes: value) not ])
+				ifTrue: [ duplicates add: value.
+					result at: key put: value ] ].
+
+	^ result
+]
+
+{ #category : #testing }
+ArtTree >> isDictionary [
+	^ false
+]
+
+{ #category : #testing }
+ArtTree >> isHealthy [
+	^ true
 ]
 
 { #category : #'private-accessing' }
 ArtTree >> nodeAt: aKey [
 	^ root
 		ifNotNil: [ :node | node nodeAt: aKey asByteArray ensureNullTerminated depth: 1 ]
+]
+
+{ #category : #removing }
+ArtTree >> remove: oldObject ifAbsent: anExceptionBlock [
+	(oldObject respondsTo: #asByteArray)
+		ifFalse: [ ^ self errorImproperStore ].
+
+	^ self removeKey: oldObject asByteArray ifAbsent: anExceptionBlock
+]
+
+{ #category : #removing }
+ArtTree >> removeAll [
+	self initializeWithRoot: nil
 ]
 
 { #category : #removing }
@@ -99,14 +205,9 @@ ArtTree >> removeKey: aKey ifAbsent: absentBlock [
 
 							val := root.
 							root := nil.
-							self removedChildren: 1.
+							self tallyDown: 1.
 							val ]
 						ifFalse: [ root removeKey: k ifAbsent: absentBlock depth: 1 ] ] ]
-]
-
-{ #category : #'state tracking' }
-ArtTree >> removedChildren: aCount [
-	size := size - aCount
 ]
 
 { #category : #private }
@@ -120,7 +221,18 @@ ArtTree >> root [
 	^ root
 ]
 
-{ #category : #accessing }
-ArtTree >> size [
-	^ size
+{ #category : #'state tracking' }
+ArtTree >> tallyDown: aCount [
+	tally := tally - aCount
+]
+
+{ #category : #'state tracking' }
+ArtTree >> tallyUp: aCount [
+	tally := tally + aCount
+]
+
+{ #category : #enumerating }
+ArtTree >> valuesDo: aBlock [ 
+	root ifNil: [ ^ self ].
+	root valuesDo: aBlock
 ]

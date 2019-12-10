@@ -15,6 +15,11 @@ ArtNode class >> on: aTree [
 		yourself
 ]
 
+{ #category : #enumerating }
+ArtNode >> associationsDo: aBlock [
+	^ self subclassResponsibility 
+]
+
 { #category : #accessing }
 ArtNode >> at: aKey depth: anObject [
 	^ self subclassResponsibility 
@@ -88,4 +93,9 @@ ArtNode >> tree [
 { #category : #accessing }
 ArtNode >> tree: anObject [
 	tree := anObject
+]
+
+{ #category : #enumerating }
+ArtNode >> valuesDo: aBlock [
+	^ self subclassResponsibility 
 ]

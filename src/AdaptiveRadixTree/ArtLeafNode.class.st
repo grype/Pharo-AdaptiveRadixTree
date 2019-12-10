@@ -19,6 +19,11 @@ ArtLeafNode >> = anObject [
 	^ value = anObject value and: [ key = anObject key ]
 ]
 
+{ #category : #enumerating }
+ArtLeafNode >> associationsDo: aBlock [
+	aBlock cull: (key copyWithoutIndex: key size) -> value
+]
+
 { #category : #accessing }
 ArtLeafNode >> at: aKey depth: depth [
 	^ (self matchesKey: aKey)
@@ -49,13 +54,8 @@ ArtLeafNode >> at: aKey put: aValue depth: depth [
 	parent replaceChild: self with: newContainer.
 	newContainer addChild: self at: (self key at: depth + lcp).
 	newContainer addChild: newLeaf at: (aKey at: depth + lcp).
-	tree addedChildren: 1.
+	tree tallyUp: 1.
 	^ aValue
-]
-
-{ #category : #enumerating }
-ArtLeafNode >> do: aBlock [
-	aBlock cull: self
 ]
 
 { #category : #comparing }
@@ -142,4 +142,9 @@ ArtLeafNode >> value [
 { #category : #accessing }
 ArtLeafNode >> value: anObject [
 	value := anObject
+]
+
+{ #category : #enumerating }
+ArtLeafNode >> valuesDo: aBlock [
+	aBlock cull: value
 ]

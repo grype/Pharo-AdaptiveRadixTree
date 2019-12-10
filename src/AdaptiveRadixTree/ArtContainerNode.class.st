@@ -47,6 +47,11 @@ ArtContainerNode >> addChild: aChildNode at: aByte [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #enumerating }
+ArtContainerNode >> associationsDo: aBlock [
+	children select: #isNotNil thenDo: [ :node | node associationsDo: aBlock ]
+]
+
 { #category : #accessing }
 ArtContainerNode >> at: aKey [
 	| index |
@@ -89,7 +94,7 @@ ArtContainerNode >> at: aKey put: aValue depth: depth [
 								value: aValue;
 								yourself)
 						at: (aKey at: depth + mismatchIndex - 1).
-					tree addedChildren: 1.
+					tree tallyUp: 1.
 					^ aValue ].
 			currentDepth := currentDepth + prefixSize ].
 
@@ -101,7 +106,7 @@ ArtContainerNode >> at: aKey put: aValue depth: depth [
 						value: aValue;
 						yourself)
 				at: (aKey at: currentDepth).
-			tree addedChildren: 1.
+			tree tallyUp: 1.
 			aValue ]
 		ifNotNil: [ :nextNode | nextNode at: aKey put: aValue depth: currentDepth + 1 ]
 ]
@@ -206,9 +211,9 @@ ArtContainerNode >> prefixMismatchWith: aKey depth: depth [
 		ifTrue: [ | minKey |
 
 			minKey := self minimum key.
-			max + 1 to: prefixSize do: [ :i | 
-				(minKey at: i) = (aKey at: i)
-					ifFalse: [ ^ i - (depth - 1) ] ] ].
+			max to: prefixSize do: [ :i | 
+				(minKey at: depth + i) = (aKey at: depth + i)
+					ifFalse: [ ^ i + 1 ] ] ].
 
 	^ prefixSize + 1
 ]
@@ -264,7 +269,7 @@ ArtContainerNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 				ifTrue: [ | val |
 
 					val := self removeChildAt: (aKey at: currentDepth).
-					tree removedChildren: 1.
+					tree tallyDown: 1.
 					val ]
 				ifFalse: [ next removeKey: aKey ifAbsent: absentBlock depth: currentDepth + 1 ] ]
 ]
@@ -360,4 +365,9 @@ ArtContainerNode >> totalSizeInMemory [
 	children
 		ifNotEmpty: [ total := children sum: [ :each | each sizeInMemory ] ].
 	^ total
+]
+
+{ #category : #enumerating }
+ArtContainerNode >> valuesDo: aBlock [
+	children select: #isNotNil thenDo: [ :node | node do: aBlock ]
 ]

@@ -1,7 +1,7 @@
 Extension { #name : #ArtTree }
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtTree >> gtInspectorIn: composite [
+ArtTree >> gtInspectorMapIn: composite [
 	<gtInspectorPresentationOrder: 90>
 	composite roassal2
 		title: [ 'Map' translated ];

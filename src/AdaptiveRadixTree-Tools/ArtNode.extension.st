@@ -18,7 +18,7 @@ ArtNode >> childrenWithKeys [
 ]
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtNode >> gtInspectorIn: composite [
+ArtNode >> gtInspectorMapIn: composite [
 	<gtInspectorPresentationOrder: 10>
 	| b |
 
