@@ -2,10 +2,12 @@ Class {
 	#name : #ArtTreeTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'tree'
+		'tree',
+		'words'
 	],
 	#classVars : [
-		'Charset'
+		'Charset',
+		'Words'
 	],
 	#category : #'AdaptiveRadixTree-Tests-Core'
 }
@@ -14,6 +16,26 @@ Class {
 ArtTreeTest class >> initialize [
 	Charset := ByteArray new: 256.
 	1 to: 255 do: [ :i | Charset at: i put: i ]
+]
+
+{ #category : #accessing }
+ArtTreeTest class >> resetWords [
+	<script>
+	Words := nil
+]
+
+{ #category : #accessing }
+ArtTreeTest class >> words [
+	^ Words
+		ifNil: [ Words := ('/usr/share/dict/words' asFileReference contents
+				splitOn: Character lf) select: [ :each | each isNotEmpty ].
+			Words := Words shuffled copyFrom: 1 to: 3333
+			]
+]
+
+{ #category : #accessing }
+ArtTreeTest >> defaultTimeLimit [
+	^ 360 seconds
 ]
 
 { #category : #running }
@@ -62,6 +84,45 @@ ArtTreeTest >> testGrowFrom16to48 [
 ]
 
 { #category : #tests }
+ArtTreeTest >> testGrowFrom48to256 [
+	| data offset root prefix children |
+
+	offset := 96.
+	prefix := 'pfx-'.
+
+	data := (1 to: 49)
+		collect: [ :i | prefix , (self stringFrom: offset + i to: offset + i + 4) ].
+
+	data do: [ :each | tree at: each put: each ].
+
+	root := tree root.
+	root should beKindOf: ArtNode256.
+	data do: [ :each | (tree at: each) should equal: each ].
+
+	root prefixSize should equal: prefix size.
+	(root prefix first: prefix size) should equal: prefix asByteArray.
+
+	root children
+		withIndexDo:
+			[ :child :index | child ifNotNil: [ (child key at: prefix size + 1) should equal: index - 1 ] ].
+
+	(root children select: #isNotNil) size should equal: data size.
+
+	children := root children select: #isNotNil.
+	children size should equal: 49.
+	children
+		withIndexDo: [ :child :index | 
+			| byte |
+
+			child should beKindOf: ArtLeafNode.
+			child key should
+				equal: (data at: index) asByteArray ensureNullTerminated.
+			child value should equal: (data at: index).
+			child parent should be: root.
+			byte := child key at: prefix size + 1 ]
+]
+
+{ #category : #tests }
 ArtTreeTest >> testGrowFrom4to16 [
 	| data offset root prefix |
 
@@ -106,12 +167,43 @@ ArtTreeTest >> testInsert1 [
 ]
 
 { #category : #tests }
+ArtTreeTest >> testInsert1Remove1 [
+	tree at: 'hello' put: 'world'.
+	tree size should equal: 1.
+	tree removeKey: 'hello'.
+	tree size should equal: 0.
+	tree root should be: nil
+]
+
+{ #category : #tests }
 ArtTreeTest >> testInsert2Identical [
 	tree at: 'abc' put: 'ABC'.
 	tree at: 'abc' put: 'ABC'.
 	tree size should equal: 1.
 
 	tree root should beKindOf: ArtLeafNode
+]
+
+{ #category : #tests }
+ArtTreeTest >> testInsert2Remove1 [
+	tree at: 'hello' put: 'world'.
+	tree at: 'good' put: 'bye'.
+	tree size should equal: 2.
+	tree removeKey: 'hello'.
+	tree size should equal: 1.
+	(tree at: 'good') should equal: 'bye'.
+	tree root should beKindOf: ArtLeafNode
+]
+
+{ #category : #tests }
+ArtTreeTest >> testInsert2Remove2 [
+	tree at: 'hello' put: 'world'.
+	tree at: 'good' put: 'bye'.
+	tree size should equal: 2.
+	tree removeKey: 'hello'.
+	tree removeKey: 'good'.
+	tree size should equal: 0.
+	tree root should be: nil
 ]
 
 { #category : #tests }
@@ -199,6 +291,46 @@ ArtTreeTest >> testInsert3Dissimilar2 [
 ]
 
 { #category : #tests }
+ArtTreeTest >> testInsertAndRemoveDictWords [
+	self words do: [ :word | tree at: word put: word ].
+	self words
+		do: [ :word | 
+			| oldCount node parent |
+
+			oldCount := tree size.
+
+			node := tree nodeAt: word.
+			node should not be: nil.
+			parent := node parent.
+			parent should not be: nil.
+
+			(tree removeKey: word ifAbsent: [ nil ]) should not be: nil.
+			tree size should equal: oldCount - 1.
+			(tree includes: word) should not be.
+
+			(tree allNodes
+				detect: [ :each | 
+					(each isKindOf: ArtContainerNode)
+						and: [ each size < each class minSize ] ]
+				ifNone: [ nil ]) should be: nil.
+
+			[ tree removeKey: word ] should raise: Error ]
+]
+
+{ #category : #tests }
+ArtTreeTest >> testInsertDictWords [
+	self class words
+		do: [ :word | 
+			| node |
+
+			tree at: word put: word.
+			(tree at: word) should equal: word.
+			node := tree nodeAt: word.
+			node should beKindOf: ArtLeafNode.
+			node value should equal: word ]
+]
+
+{ #category : #tests }
 ArtTreeTest >> testInsertFrom: start to: end expectedType: aType [
 	start to: end do: [ :i | 
 		| s |
@@ -228,14 +360,6 @@ ArtTreeTest >> testInsertMany [
 	self testInsertFrom: 1 to: 48 expectedType: ArtNode48.
 	self testInsertFrom: 1 to: 49 expectedType: ArtNode256.
 	self testInsertFrom: 1 to: 255 expectedType: ArtNode256
-]
-
-{ #category : #tests }
-ArtTreeTest >> testInsertRemove1 [
-	tree at: 'abc' put: 'ABC'.
-	tree removeKey: 'abc'.
-	tree size should equal: 0.
-	tree root should be: nil.
 ]
 
 { #category : #tests }
@@ -269,4 +393,105 @@ ArtTreeTest >> testInsertTwice [
 	thirdChild should beKindOf: ArtLeafNode.
 	thirdChild key should equal: 'tamable' asByteArray ensureNullTerminated.
 	thirdChild value should equal: 'tamable'
+]
+
+{ #category : #tests }
+ArtTreeTest >> testRemoveNonExistingFromLeaf [
+	tree at: 'foo' put: 'Foo'.
+	(tree removeKey: 'fooz' ifAbsent: [ nil ]) should equal: nil
+]
+
+{ #category : #tests }
+ArtTreeTest >> testShrinkFoldingFrom16to4 [
+	| data root |
+
+	data := #('pitifully' 'pileous' 'pileweed' 'pichuric' 'pictorialness' 'pippin' 'piecette').
+	data do: [ :word | tree at: word put: word ].
+	tree size should equal: data size.
+	data
+		withIndexDo: [ :word :index | 
+			| child count |
+
+			count := tree size.
+			child := tree removeKey: word ifAbsent: [ nil ].
+			child should not be: nil.
+			tree size should equal: count - 1.
+
+			root := tree root.
+			index = data size
+				ifTrue: [ root should be: nil ]
+				ifFalse: [ index = (data size - 1)
+						ifTrue: [ root isLeaf should be ]
+						ifFalse: [ root isLeaf
+								ifFalse: [ (root size between: root class minSize and: root class maxSize)
+										should be ] ] ] ]
+]
+
+{ #category : #tests }
+ArtTreeTest >> testShrinkFrom16To4 [
+	| data offset |
+	
+	offset := 97.
+	data := (1 to: 5) collect: [ :i | self stringFrom: offset + i to: offset + i + 3 ].
+	data do: [ :word | tree at: word put: word ].
+	tree size should equal: 5.
+	tree removeKey: data last.
+	tree size should equal: 4.
+	tree root should beKindOf: ArtNode4
+]
+
+{ #category : #tests }
+ArtTreeTest >> testShrinkFrom256To48 [
+	self testShrinkFrom: 49 to: 48.
+	tree root should beKindOf: ArtNode48
+]
+
+{ #category : #tests }
+ArtTreeTest >> testShrinkFrom48To16 [
+	| data offset |
+	
+	offset := 97.
+	data := (1 to: 17) collect: [ :i | self stringFrom: offset + i to: offset + i + 3 ].
+	data do: [ :word | tree at: word put: word ].
+	tree size should equal: 17.
+	tree removeKey: data last.
+	tree size should equal: 16.
+	tree root should beKindOf: ArtNode16
+]
+
+{ #category : #tests }
+ArtTreeTest >> testShrinkFrom4ToLeaf [
+	tree at: 'abc' put: 'ABC'.
+	tree at: 'zba' put: 'zba'.
+	tree removeKey: 'abc'.
+	tree size should equal: 1.
+	tree root should beKindOf: ArtLeafNode.
+	tree root key should equal: 'zba' asByteArray ensureNullTerminated.
+	tree root value should equal: 'zba'
+]
+
+{ #category : #tests }
+ArtTreeTest >> testShrinkFrom: fromSize to: toSize [
+	| data offset |
+
+	offset := 97.
+	data := (1 to: fromSize)
+		collect: [ :i | self stringFrom: offset + i to: offset + i + 3 ].
+	data do: [ :word | tree at: word put: word ].
+	tree size should equal: fromSize.
+	fromSize - toSize timesRepeat: [ tree removeKey: data last ].
+	tree size should equal: toSize
+]
+
+{ #category : #tests }
+ArtTreeTest >> testShrinkFromLeafToNil [
+	tree at: 'abc' put: 'ABC'.
+	tree removeKey: 'abc'.
+	tree size should equal: 0.
+	tree root should be: nil.
+]
+
+{ #category : #accessing }
+ArtTreeTest >> words [
+	^ self class words
 ]

@@ -26,16 +26,16 @@ ArtNode4 >> addChild: aChildNode at: aByte [
 	index := 1.
 	self isFull
 		ifTrue: [ ^ self grow addChild: aChildNode at: aByte ]
-		ifFalse: [ [ index <= size and: [ aByte >= (keys at: index) ] ]
+		ifFalse: [ [ index <= tally and: [ aByte >= (keys at: index) ] ]
 				whileTrue: [ index := index + 1 ] ].
 
-	size >= index
-		ifTrue: [ keys shiftRight: 1 from: index to: size.
-			children shiftRight: 1 from: index to: size ].
+	tally >= index
+		ifTrue: [ keys shiftRight: 1 from: index to: tally.
+			children shiftRight: 1 from: index to: tally ].
 	keys byteAt: index put: aByte.
 	children at: index put: aChildNode.
 	aChildNode parent: self.
-	size := size + 1.
+	tally := tally + 1.
 	^ aChildNode
 ]
 
@@ -48,7 +48,7 @@ ArtNode4 >> grow [
 	parent replaceChild: self with: newNode.
 	newKeys := newNode keys.
 	newChildren := newNode children.
-	1 to: size do: [ :i | 
+	1 to: tally do: [ :i | 
 		newKeys byteAt: i put: (keys at: i).
 		(newChildren at: i put: (children at: i)) parent: newNode ].
 	^ newNode
@@ -69,7 +69,7 @@ ArtNode4 >> indexOf: aKey [
 { #category : #accessing }
 ArtNode4 >> maximum [
 	"Returns the right-most leaf node by recursively traversing children using highest byte index"
-	^ (children at: size) maximum
+	^ (children at: tally) maximum
 ]
 
 { #category : #accessing }
@@ -89,12 +89,17 @@ ArtNode4 >> removeChildAt: aByte [
 
 	answer := children at: index.
 
-	keys shiftLeft: 1 from: index + 1 to: size.
-	children shiftLeft: 1 from: index + 1 to: size.
+	index = tally
+		ifTrue: [ keys at: index put: 0.
+			children at: index put: nil ]
+		ifFalse: [ keys shiftLeft: 1 from: index + 1 to: tally.
+			children shiftLeft: 1 from: index + 1 to: tally ].
 
-	size := size - 1.
-	size < self class minSize
-		ifTrue: [ self shrink ].
+	keys at: tally put: 0.
+	children at: tally put: nil.
+	tally := tally - 1.
+	tree tallyDown: 1.
+	self shrinkIfNecessary.
 	^ answer
 ]
 
@@ -106,23 +111,19 @@ ArtNode4 >> shrink [
 	newNode isLeaf
 		ifFalse: [ currentPrefixSize := prefixSize.
 			currentPrefixSize < self class maxPrefixSize
-				ifTrue: [ prefix := prefix copyWith: keys first.
-					currentPrefixSize := currentPrefixSize + 1 ].
+				ifTrue: [ currentPrefixSize := currentPrefixSize + 1.
+					prefix at: currentPrefixSize put: keys first ].
 			currentPrefixSize < self class maxPrefixSize
 				ifTrue: [ | childPrefixSize |
 
 					childPrefixSize := newNode prefixSize
 						min: self class maxPrefixSize - currentPrefixSize.
-					prefix
-						replaceFrom: currentPrefixSize + 1
-						to: currentPrefixSize + childPrefixSize
-						with: newNode prefix.
+					1 to: childPrefixSize do:
+						[ :index | prefix at: currentPrefixSize + index put: (newNode prefix at: index) ].
 					currentPrefixSize := currentPrefixSize + childPrefixSize ].
-			newNode
-				prefix:
-					(prefix
-						copyFrom: 1
-						to: (currentPrefixSize min: self class maxPrefixSize)).
+			1 to: (currentPrefixSize min: self class maxPrefixSize) do: [ :index | newNode prefix at: index put: (prefix at: index) ].
 			newNode prefixSize: newNode prefixSize + prefixSize + 1 ].
-	parent replaceChild: self with: newNode
+	parent replaceChild: self with: newNode.
+	self releaseFromTree.
+	^ newNode
 ]

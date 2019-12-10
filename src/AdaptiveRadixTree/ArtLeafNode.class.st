@@ -121,7 +121,7 @@ ArtLeafNode >> printOn: aStream [
 
 { #category : #removing }
 ArtLeafNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
-	^ self shouldNotImplement 
+	^ absentBlock value
 ]
 
 { #category : #accessing }

@@ -34,6 +34,18 @@ ArtTree >> add: anAssociation [
 	self at: anAssociation key put: anAssociation value
 ]
 
+{ #category : #accessing }
+ArtTree >> allNodes [
+	| collection |
+
+	collection := OrderedCollection new.
+	root
+		ifNotNil:
+			[ :node | node withAllChildNodesDo: [ :each | collection add: each ] ].
+
+	^ collection
+]
+
 { #category : #converting }
 ArtTree >> asArtTree [
 	^ self species == ArtTree
@@ -196,24 +208,22 @@ ArtTree >> removeKey: aKey ifAbsent: absentBlock [
 	| k |
 
 	k := aKey asByteArray ensureNullTerminated.
-	^ ArtCurrentTree
-		value: self
-		during: [ root
-				ifNil: [ absentBlock value ]
-				ifNotNil: [ root isLeaf
-						ifTrue: [ | val |
+	^ root
+		ifNil: [ absentBlock value ]
+		ifNotNil: [ (root isLeaf and: [ root matchesKey: aKey ])
+				ifTrue: [ | val |
 
-							val := root.
-							root := nil.
-							self tallyDown: 1.
-							val ]
-						ifFalse: [ root removeKey: k ifAbsent: absentBlock depth: 1 ] ] ]
+					val := root.
+					root := nil.
+					self tallyDown: 1.
+					val ]
+				ifFalse: [ root removeKey: k ifAbsent: absentBlock depth: 1 ] ]
 ]
 
 { #category : #private }
 ArtTree >> replaceChild: aChild with: aNewChild [
-	root := aNewChild.
 	aNewChild parent: self.
+	root := aNewChild
 ]
 
 { #category : #accessing }

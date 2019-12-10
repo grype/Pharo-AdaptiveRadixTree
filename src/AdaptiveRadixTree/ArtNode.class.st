@@ -15,6 +15,15 @@ ArtNode class >> on: aTree [
 		yourself
 ]
 
+{ #category : #accessing }
+ArtNode >> allNodes [
+	| collection |
+
+	collection := OrderedCollection new.
+	self nodesDo: [ :node | collection add: node ].
+	^ collection 
+]
+
 { #category : #enumerating }
 ArtNode >> associationsDo: aBlock [
 	^ self subclassResponsibility 
@@ -98,4 +107,10 @@ ArtNode >> tree: anObject [
 { #category : #enumerating }
 ArtNode >> valuesDo: aBlock [
 	^ self subclassResponsibility 
+]
+
+{ #category : #enumerating }
+ArtNode >> withAllChildNodesDo: aBlock [
+	aBlock cull: self.
+	self childrenWithKeys do: [ :assoc | assoc value withAllChildNodesDo: aBlock ]
 ]

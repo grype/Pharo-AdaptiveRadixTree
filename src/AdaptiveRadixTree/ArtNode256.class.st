@@ -23,7 +23,7 @@ ArtNode256 class >> minSize [
 ArtNode256 >> addChild: aChildNode at: aByte [
 	children at: aByte + 1 put: aChildNode.
 	aChildNode parent: self.
-	size := size + 1.
+	tally := tally + 1.
 	^ aChildNode
 ]
 
@@ -70,6 +70,28 @@ ArtNode256 >> removeChildAt: aByte [
 	answer := children at: index.
 	children at: index put: nil.
 
-	size := size - 1.
+	tally := tally - 1.
+	tree tallyDown: 1.
+	self shrinkIfNecessary.
 	^ answer
+]
+
+{ #category : #private }
+ArtNode256 >> shrink [
+	| newNode |
+
+	newNode := ArtNode48 on: tree.
+	newNode copyMetaFrom: self.
+	newNode tally: 0.
+	children
+		withIndexDo: [ :each :index | 
+			each
+				ifNotNil: [ :child | 
+					newNode tallyUp.
+					child parent: newNode.
+					newNode children at: newNode size put: child.
+					newNode keys at: index put: newNode size ] ].
+	parent replaceChild: self with: newNode.
+	self releaseFromTree.
+	^ newNode
 ]

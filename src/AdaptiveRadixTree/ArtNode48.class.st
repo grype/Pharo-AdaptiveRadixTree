@@ -30,7 +30,7 @@ ArtNode48 >> addChild: aChildNode at: aByte [
 	children at: index put: aChildNode.
 	keys byteAt: aByte + 1 put: index.
 	aChildNode parent: self.
-	size := size + 1.
+	tally := tally + 1.
 	^ aChildNode
 ]
 
@@ -88,15 +88,33 @@ ArtNode48 >> removeChildAt: aByte [
 	index > 0
 		ifFalse: [ ^ answer ].
 
-	keys at: aByte put: 0.
+	keys at: aByte + 1 put: 0.
 	answer := children at: index.
 	children at: index put: nil.
 
-	size := size - 1.
+	tally := tally - 1.
+	tree tallyDown: 1.
+	self shrinkIfNecessary.
 	^ answer
 ]
 
-{ #category : #'private-adding' }
-ArtNode48 >> removeKeyAtIndex: index [
+{ #category : #private }
+ArtNode48 >> shrink [
+	| newNode |
 
+	newNode := ArtNode16 on: tree.
+	newNode copyMetaFrom: self.
+	newNode tally: 0.
+	keys
+		withIndexDo: [ :childIndex :byte | 
+			childIndex > 0
+				ifTrue: [ (children at: childIndex)
+						ifNotNil: [ :child | 
+							newNode tallyUp.
+							newNode keys at: newNode size put: byte - 1.
+							newNode children at: newNode size put: child.
+							child parent: newNode ] ] ].
+	parent replaceChild: self with: newNode.
+	self releaseFromTree.
+	^ newNode
 ]

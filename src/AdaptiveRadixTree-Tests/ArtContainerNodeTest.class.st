@@ -18,7 +18,7 @@ ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
 	newNode should beKindOf: ArtNode4.
 	newNode parent should be: parent.
 	node parent should be: newNode.
-	newNode prefix should equal: 'a' asByteArray.
+	(newNode prefix copyFrom: 1 to: newNode prefixSize) should equal: 'a' asByteArray.
 	newNode prefixSize should equal: 1.
 	node prefixSize should equal: 0.
 
@@ -39,7 +39,7 @@ ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
 	node prefixSize: 2.
 	newNode := node splitAtPrefixIndex: 2 depth: 1.
 	newNode should beKindOf: ArtNode4.
-	newNode prefix should equal: 'a' asByteArray.
+	(newNode prefix copyFrom: 1 to: newNode prefixSize) should equal: 'a' asByteArray.
 	newNode prefixSize should equal: 1.
 	node prefixSize should equal: 0.
 
@@ -49,7 +49,7 @@ ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
 	node prefixSize: 2.
 	newNode := node splitAtPrefixIndex: 2 depth: 100.
 	newNode should beKindOf: ArtNode4.
-	newNode prefix should equal: 'a' asByteArray.
+	(newNode prefix copyFrom: 1 to: newNode prefixSize) should equal: 'a' asByteArray.
 	newNode prefixSize should equal: 1.
 	node prefixSize should equal: 0.
 
@@ -59,7 +59,7 @@ ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
 	node prefixSize: 2.
 	newNode := node splitAtPrefixIndex: 2 depth: 1.
 	newNode should beKindOf: ArtNode4.
-	newNode prefix should equal: 'a' asByteArray.
+	(newNode prefix copyFrom: 1 to: newNode prefixSize) should equal: 'a' asByteArray.
 	newNode prefixSize should equal: 1.
 	node prefixSize should equal: 0.
 
@@ -75,7 +75,7 @@ ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
 	node children at: 1 put: leaf.
 	newNode := node splitAtPrefixIndex: 2 depth: 1.
 	newNode should beKindOf: ArtNode4.
-	newNode prefix should equal: 'a' asByteArray.
+	(newNode prefix copyFrom: 1 to: newNode prefixSize) should equal: 'a' asByteArray.
 	newNode prefixSize should equal: 1.
 	(newNode keys at: 1) should equal: (leaf key at: 2).
 	node prefixSize should equal: 9.

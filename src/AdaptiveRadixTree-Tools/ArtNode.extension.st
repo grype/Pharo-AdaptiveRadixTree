@@ -46,7 +46,10 @@ ArtNode class >> gtMapViewBuilder [
 		using: [ :node | 
 			node isLeaf
 				ifTrue: [ Array new ]
-				ifFalse: [ node childNodes ] ].
+				ifFalse: [ 
+					node childrenWithKeys collect: #value
+					"node childNodes "
+					] ].
 
 	b labelShape text
 		text: [ :node | 

@@ -35,7 +35,7 @@ ArtNode16 >> addChild: aChildNode at: aByte [
 				to: self size
 				do: [ :found | found ]
 				ifNone: [ :low :high | high ].
-			index <= size
+			index <= tally
 				ifTrue: [ 
 					self shiftChildrenLargerThan: aByte from: index
 					] ].
@@ -43,7 +43,7 @@ ArtNode16 >> addChild: aChildNode at: aByte [
 	keys byteAt: index put: aByte.
 	children at: index put: aChildNode.
 	aChildNode parent: self.
-	size := size + 1.
+	tally := tally + 1.
 	^ aChildNode
 ]
 
@@ -84,7 +84,7 @@ ArtNode16 >> indexOf: aKey [
 { #category : #accessing }
 ArtNode16 >> maximum [
 	"Returns the right-most leaf node by recursively traversing children using highest byte index"
-	^ (children at: size) maximum
+	^ (children at: tally) maximum
 ]
 
 { #category : #accessing }
@@ -104,9 +104,34 @@ ArtNode16 >> removeChildAt: aByte [
 
 	answer := children at: index.
 
-	keys shiftLeft: 1 from: index + 1 to: size.
-	children shiftLeft: 1 from: index + 1 to: size.
+	index = tally
+		ifTrue: [ keys at: index put: 0.
+			children at: index put: nil ]
+		ifFalse: [ keys shiftLeft: 1 from: index + 1 to: tally.
+			children shiftLeft: 1 from: index + 1 to: tally ].
 
-	size := size - 1.
+	tally := tally - 1.
+	tree tallyDown: 1.
+	self shrinkIfNecessary.
 	^ answer
+]
+
+{ #category : #private }
+ArtNode16 >> shrink [
+	| newNode newSize |
+
+	newNode := ArtNode4 on: tree.
+	newNode copyMetaFrom: self.
+	newSize := newNode keys size.
+	1 to: newSize do: [ :i | 
+		| child |
+
+		child := children at: i.
+		child parent: newNode.
+		newNode children at: i put: child.
+		newNode keys at: i put: (keys at: i) ].
+	newNode tally: newSize.
+	parent replaceChild: self with: newNode.
+	self releaseFromTree.
+	^ newNode
 ]

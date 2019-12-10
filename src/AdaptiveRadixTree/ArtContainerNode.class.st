@@ -3,10 +3,10 @@ Class {
 	#superclass : #ArtNode,
 	#instVars : [
 		'children',
-		'size',
 		'keys',
 		'prefix',
-		'prefixSize'
+		'prefixSize',
+		'tally'
 	],
 	#category : #'AdaptiveRadixTree-Core'
 }
@@ -49,7 +49,7 @@ ArtContainerNode >> addChild: aChildNode at: aByte [
 
 { #category : #enumerating }
 ArtContainerNode >> associationsDo: aBlock [
-	children select: #isNotNil thenDo: [ :node | node associationsDo: aBlock ]
+	self childrenWithKeys do: [ :each | each value associationsDo: aBlock ]
 ]
 
 { #category : #accessing }
@@ -112,24 +112,24 @@ ArtContainerNode >> at: aKey put: aValue depth: depth [
 ]
 
 { #category : #accessing }
-ArtContainerNode >> childNodes [
-	^ children select: #isNotNil
+ArtContainerNode >> children [
+	^ children
 ]
 
 { #category : #accessing }
-ArtContainerNode >> children [
-	^ children
+ArtContainerNode >> children: anObject [
+	children := anObject
 ]
 
 { #category : #copying }
 ArtContainerNode >> copyMetaFrom: aNode [
 	prefix := aNode prefix copy.
 	prefixSize := aNode prefixSize.
-	size := aNode size.
+	tally := aNode size.
 	parent := aNode parent.
 ]
 
-{ #category : #testing }
+{ #category : #private }
 ArtContainerNode >> grow [
 	^ self subclassResponsibility 
 ]
@@ -153,12 +153,12 @@ ArtContainerNode >> initialize [
 
 	prefix := ByteArray new: self class maxPrefixSize.
 	prefixSize := 0.
-	size := 0
+	tally := 0
 ]
 
 { #category : #testing }
 ArtContainerNode >> isEmpty [
-	^ size = 0
+	^ tally = 0
 ]
 
 { #category : #testing }
@@ -169,6 +169,11 @@ ArtContainerNode >> isFull [
 { #category : #accessing }
 ArtContainerNode >> keys [
 	^ keys
+]
+
+{ #category : #accessing }
+ArtContainerNode >> keys: anObject [
+	keys := anObject
 ]
 
 { #category : #private }
@@ -235,7 +240,7 @@ ArtContainerNode >> printOn: aStream [
 	super printOn: aStream.
 	aStream
 		nextPutAll: ' size: ';
-		print: size.
+		print: tally.
 	aStream
 		nextPutAll: ' prefixSize: ';
 		print: prefixSize.
@@ -247,7 +252,13 @@ ArtContainerNode >> printOn: aStream [
 		print: keys
 ]
 
-{ #category : #adding }
+{ #category : #private }
+ArtContainerNode >> releaseFromTree [
+	tree := nil.
+	parent := nil
+]
+
+{ #category : #removing }
 ArtContainerNode >> removeChildAt: aByte [
 	^ self subclassResponsibility 
 ]
@@ -258,19 +269,15 @@ ArtContainerNode >> removeKey: aKey ifAbsent: absentBlock depth: depth [
 
 	currentDepth := depth.
 	prefixSize > 0
-		ifTrue: [ (self prefixMismatchWith: aKey depth: depth) ~= (prefixSize + 1)
-				ifTrue: [ ^ absentBlock value ]
-				ifFalse: [ currentDepth := currentDepth + prefixSize ] ].
-			
+		ifTrue: [ (self prefixMismatchWith: aKey depth: depth) = (prefixSize + 1)
+				ifTrue: [ currentDepth := currentDepth + prefixSize ]
+				ifFalse: [ ^ absentBlock value ] ].
+
 	^ (self at: (aKey at: currentDepth))
 		ifNil: [ absentBlock value ]
 		ifNotNil: [ :next | 
 			(next isLeaf and: [ next matchesKey: aKey ])
-				ifTrue: [ | val |
-
-					val := self removeChildAt: (aKey at: currentDepth).
-					tree tallyDown: 1.
-					val ]
+				ifTrue: [ self removeChildAt: (aKey at: currentDepth) ]
 				ifFalse: [ next removeKey: aKey ifAbsent: absentBlock depth: currentDepth + 1 ] ]
 ]
 
@@ -283,17 +290,17 @@ ArtContainerNode >> replaceChild: aChild with: newChild [
 	children at: index put: newChild
 ]
 
-{ #category : #adding }
+{ #category : #private }
 ArtContainerNode >> shiftChildrenAt: index [
-	size + 1 to: index by: -1 do: [ :i | 
+	tally + 1 to: index by: -1 do: [ :i | 
 		i > 1
 			ifTrue: [ children at: i put: (children at: i - 1) ] ].
-	children at: size put: nil
+	children at: tally put: nil
 ]
 
-{ #category : #adding }
+{ #category : #private }
 ArtContainerNode >> shiftChildrenLargerThan: aByte from: index [
-	size to: index by: -1 do: [ :i | 
+	tally to: index by: -1 do: [ :i | 
 		| previous |
 
 		previous := keys byteAt: i.
@@ -302,20 +309,26 @@ ArtContainerNode >> shiftChildrenLargerThan: aByte from: index [
 				children at: i + 1 put: (children at: i) ] ]
 ]
 
-{ #category : #adding }
+{ #category : #private }
 ArtContainerNode >> shiftKeysAtIndex: index [
-	size to: index by: -1 do: [ :i | i > 1 ifTrue: [keys at: i put: (keys byteAt: i + 1)] ].
-	keys at: size put: 0
+	tally to: index by: -1 do: [ :i | i > 1 ifTrue: [keys at: i put: (keys byteAt: i + 1)] ].
+	keys at: tally put: 0
 ]
 
-{ #category : #testing }
+{ #category : #private }
 ArtContainerNode >> shrink [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #adding }
+ArtContainerNode >> shrinkIfNecessary [
+	tally < self class minSize
+		ifTrue: [ self shrink ]
+]
+
 { #category : #accessing }
 ArtContainerNode >> size [
-	^ size
+	^ tally
 ]
 
 { #category : #splitjoin }
@@ -326,14 +339,13 @@ ArtContainerNode >> splitAtPrefixIndex: anIndex depth: depth [
 	newContainer prefixSize: anIndex - 1.
 
 	newContainer prefixSize > 0
-		ifTrue: [ newContainer
-				prefix:
-					(prefix
-						copyFrom: 1
-						to: (anIndex - 1 min: newContainer class maxPrefixSize)) ].
+		ifTrue: [ | newPrefix |
+
+			newPrefix := newContainer prefix.
+			1 to: (anIndex - 1 min: newContainer class maxPrefixSize) do: [ :i | newPrefix at: i put: (prefix at: i) ] ].
 
 	parent replaceChild: self with: newContainer.
-	
+
 	origSize := prefixSize.
 	origPrefix := prefix copy.
 
@@ -341,17 +353,29 @@ ArtContainerNode >> splitAtPrefixIndex: anIndex depth: depth [
 		ifTrue: [ newContainer addChild: self at: (prefix at: anIndex).
 			prefixSize := prefixSize - anIndex.
 			prefixSize > 0
-				ifTrue: [ prefix := prefix
-						copyFrom: anIndex + 1
-						to: anIndex + (prefixSize min: self class maxPrefixSize) ] ]
+				ifTrue:
+					[ 1 to: prefixSize do: [ :i | prefix at: i put: (prefix at: anIndex + i) ] ] ]
 		ifFalse: [ prefixSize := prefixSize - anIndex.
 			minKey := self minimum key asByteArray.
 			newContainer addChild: self at: (minKey at: depth - 1 + anIndex).
-			prefix := minKey
-				copyFrom: depth + anIndex
-				to: depth - 1 + anIndex + (prefixSize min: self class maxPrefixSize) ].
-			
+			1 to: (prefixSize min: self class maxPrefixSize) do: [ :i | prefix at: i put: (minKey at: depth - 1 + anIndex + i) ] ].
+
 	^ newContainer
+]
+
+{ #category : #tallying }
+ArtContainerNode >> tally: anInteger [
+	tally := anInteger 
+]
+
+{ #category : #tallying }
+ArtContainerNode >> tallyDown [
+	tally := tally - 1
+]
+
+{ #category : #tallying }
+ArtContainerNode >> tallyUp [
+	tally := tally + 1
 ]
 
 { #category : #accessing }
@@ -359,7 +383,7 @@ ArtContainerNode >> totalSizeInMemory [
 	| total |
 
 	total := self sizeInMemory + prefix sizeInMemory
-		+ prefixSize sizeInMemory + size sizeInMemory + keys sizeInMemory
+		+ prefixSize sizeInMemory + tally sizeInMemory + keys sizeInMemory
 		+ children sizeInMemory.
 
 	children
@@ -369,5 +393,5 @@ ArtContainerNode >> totalSizeInMemory [
 
 { #category : #enumerating }
 ArtContainerNode >> valuesDo: aBlock [
-	children select: #isNotNil thenDo: [ :node | node do: aBlock ]
+	children select: #isNotNil thenDo: [ :node | node valuesDo: aBlock ]
 ]
