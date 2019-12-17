@@ -129,6 +129,11 @@ ArtTree >> at: aKey put: aValue [
 		ifNotNil: [ root at: key put: aValue depth: 1 ]
 ]
 
+{ #category : #private }
+ArtTree >> compact [
+	"Nothing to compact"
+]
+
 { #category : #removing }
 ArtTree >> fixCollisionsFrom: start [
 
