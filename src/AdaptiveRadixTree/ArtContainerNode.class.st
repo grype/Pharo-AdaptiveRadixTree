@@ -1,3 +1,8 @@
+"
+I represent an abstract container node of an adaptive radix tree.
+
+I maintain two collections - one for storing child nodes, and one for storing keys by which I store those children. My subclasses utilize those collections in different ways to facilitate the compact nature of an adaptive radix tree. See class comments on my subclasses for details...
+"
 Class {
 	#name : #ArtContainerNode,
 	#superclass : #ArtNode,

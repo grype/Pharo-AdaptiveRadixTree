@@ -1,3 +1,28 @@
+"
+I am a node of an Adaptive Radix Tree.
+
+I represent an abstract implementation of two kinds of nodes - a leaf or a container. Leaf nodes hold key-value associations, while container nodes store a collection of child nodes. See class comments of my subclasses for details...
+
+Access values (which could be a child node) using:
+
+- #at:depth:
+- #at:put:depth
+
+Access nodes: 
+
+- #nodeAt:depth:
+
+Enumeration: 
+
+- #associationsDo: enumerates over leaf nodes, using their key-value associations
+- #childreWithkeys returns a list of a dictionary of child children by key
+
+Instance Variables
+	parent:		<ArtNode> | <ArtTree>
+	tree:		<ArtTree>
+			
+To aid in enumeration and tallying, I keep references to parent entity, which could be the tree or another node, and to the owning tree.
+"
 Class {
 	#name : #ArtNode,
 	#superclass : #Object,

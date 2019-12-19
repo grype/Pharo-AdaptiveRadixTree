@@ -1,3 +1,8 @@
+"
+I am a container node of an adaptive radix tree that contains up to 16 children.
+
+I am very much like ==ArtNode4== except my #keys and #children arrays are four times larger.
+"
 Class {
 	#name : #ArtNode16,
 	#superclass : #ArtContainerNode,

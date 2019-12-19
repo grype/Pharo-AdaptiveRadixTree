@@ -1,3 +1,16 @@
+"
+I am a leaf node of an adaptive radix tree.
+
+I store they key-value association by which I am created.
+
+For example:
+
+tree := ArtTree new.
+tree at: 'hello' put: 'world'.
+tree nodeAt: 'hello'. ""an ArtLeafNode""
+
+
+"
 Class {
 	#name : #ArtLeafNode,
 	#superclass : #ArtNode,

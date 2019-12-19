@@ -1,3 +1,21 @@
+"
+I am an Adaptive Radix Tree.
+
+I am like a ==Dictionary== that structures key-value pairs in a form of an adaptive radix tree.
+
+For further information on Adaptive Radix Tree see [ https://db.in.tum.de/~leis/papers/ART.pdf ].
+
+Examples:
+	
+	tree := ArtTree new.
+	tree at: 'hello' put: 'world'.
+	tree at: 'hello'. ""world""
+	tree removeKey: 'hello'.
+	tree values.
+	tree keys.
+	tree do: [ :value | ... ].
+	tree associationsDo: [ :key :value | ... ]
+"
 Class {
 	#name : #ArtTree,
 	#superclass : #Dictionary,

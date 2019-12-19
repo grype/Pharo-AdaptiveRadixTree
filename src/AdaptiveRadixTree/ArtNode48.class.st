@@ -1,3 +1,11 @@
+"
+I am a container node of an adaptive radix tree that contains up to 48 children.
+
+I store references to #children in a small array, and use #keys to map keys to indecies into that array.
+
+#keys             #children
+#(1 2 3 ... 256)  #(A B C ... D)
+"
 Class {
 	#name : #ArtNode48,
 	#superclass : #ArtContainerNode,

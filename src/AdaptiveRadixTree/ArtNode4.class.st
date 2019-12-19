@@ -1,3 +1,11 @@
+"
+I am a container node of an adaptive radix tree that contains up to 4 children.
+
+I am the smallest containeir node, and I store key-child relationship using two small arrays #keys and #children. Both arrays are maintained sorted - that is, any insertion or removal of children will reorganize the two arrays so that the keys are ordered in ascending manner.
+
+#keys          #children
+#(1 2 3 255)   #(A B C D)
+"
 Class {
 	#name : #ArtNode4,
 	#superclass : #ArtContainerNode,
