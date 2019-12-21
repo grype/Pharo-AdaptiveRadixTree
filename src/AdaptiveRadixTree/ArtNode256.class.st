@@ -1,7 +1,7 @@
 "
 I am a container node of an adaptive radix tree that contains up to 256 children.
 
-I am the largest type of node. I don't bother with #keys and simply store my #children in a 256 byte array.
+I am the largest type of node. I don't bother with #keys and simply store my #children in a 256 byte array with keys as indecies into the array.
 
 #children
 #(A B C ... D)
