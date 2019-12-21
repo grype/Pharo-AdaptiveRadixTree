@@ -76,7 +76,7 @@ ArtTreeTest >> testGrowFrom16to48 [
 
 			child should beKindOf: ArtLeafNode.
 			child key should
-				equal: (data at: index) asByteArray ensureNullTerminated.
+				equal: (data at: index) asByteArray nullTerminated.
 			child value should equal: (data at: index).
 			child parent should be: root.
 			byte := child key at: prefix size + 1.
@@ -116,7 +116,7 @@ ArtTreeTest >> testGrowFrom48to256 [
 
 			child should beKindOf: ArtLeafNode.
 			child key should
-				equal: (data at: index) asByteArray ensureNullTerminated.
+				equal: (data at: index) asByteArray nullTerminated.
 			child value should equal: (data at: index).
 			child parent should be: root.
 			byte := child key at: prefix size + 1 ]
@@ -151,7 +151,7 @@ ArtTreeTest >> testGrowFrom4to16 [
 		withIndexDo: [ :child :index | 
 			child should beKindOf: ArtLeafNode.
 			child key should
-				equal: (data at: index) asByteArray ensureNullTerminated.
+				equal: (data at: index) asByteArray nullTerminated.
 			child value should equal: (data at: index).
 			child parent should be: root ]
 ]
@@ -161,7 +161,7 @@ ArtTreeTest >> testInsert1 [
 	tree at: 'hello' put: 'world'.
 	tree size should equal: 1.
 	tree root should beKindOf: ArtLeafNode.
-	tree root key should equal: 'hello' asByteArray ensureNullTerminated.
+	tree root key should equal: 'hello' asByteArray nullTerminated.
 	tree root value should equal: 'world'.
 	(tree at: 'hello') should equal: 'world'.
 ]
@@ -221,12 +221,12 @@ ArtTreeTest >> testInsert2Similar [
 
 	firstChild := root children first.
 	firstChild should beKindOf: ArtLeafNode.
-	firstChild key should equal: 'abc' asByteArray ensureNullTerminated.
+	firstChild key should equal: 'abc' asByteArray nullTerminated.
 	firstChild value should equal: 'ABC'.
 	
 	secondChild := root children second.
 	secondChild should beKindOf: ArtLeafNode.
-	secondChild key should equal: 'abd' asByteArray ensureNullTerminated.
+	secondChild key should equal: 'abd' asByteArray nullTerminated.
 	secondChild value should equal: 'ABD'
 ]
 
@@ -246,17 +246,17 @@ ArtTreeTest >> testInsert3Dissimilar [
 
 	firstChild := root children first.
 	firstChild should beKindOf: ArtLeafNode.
-	firstChild key should equal: 'alice' asByteArray ensureNullTerminated.
+	firstChild key should equal: 'alice' asByteArray nullTerminated.
 	firstChild value should equal: 'Alice'.
 
 	secondChild := root children second.
 	secondChild should beKindOf: ArtLeafNode.
-	secondChild key should equal: 'bob' asByteArray ensureNullTerminated.
+	secondChild key should equal: 'bob' asByteArray nullTerminated.
 	secondChild value should equal: 'Bob'.
 
 	thirdChild := root children third.
 	thirdChild should beKindOf: ArtLeafNode.
-	thirdChild key should equal: 'carl' asByteArray ensureNullTerminated.
+	thirdChild key should equal: 'carl' asByteArray nullTerminated.
 	thirdChild value should equal: 'Carl'
 ]
 
@@ -276,17 +276,17 @@ ArtTreeTest >> testInsert3Dissimilar2 [
 
 	firstChild := root children first.
 	firstChild should beKindOf: ArtLeafNode.
-	firstChild key should equal: 'Charadrii' asByteArray ensureNullTerminated.
+	firstChild key should equal: 'Charadrii' asByteArray nullTerminated.
 	firstChild value should equal: 'Charadrii'.
 
 	secondChild := root children second.
 	secondChild should beKindOf: ArtLeafNode.
-	secondChild key should equal: 'lengthy' asByteArray ensureNullTerminated.
+	secondChild key should equal: 'lengthy' asByteArray nullTerminated.
 	secondChild value should equal: 'lengthy'.
 
 	thirdChild := root children third.
 	thirdChild should beKindOf: ArtLeafNode.
-	thirdChild key should equal: 'tamable' asByteArray ensureNullTerminated.
+	thirdChild key should equal: 'tamable' asByteArray nullTerminated.
 	thirdChild value should equal: 'tamable'
 ]
 
@@ -381,17 +381,17 @@ ArtTreeTest >> testInsertTwice [
 
 	firstChild := root children first.
 	firstChild should beKindOf: ArtLeafNode.
-	firstChild key should equal: 'Charadrii' asByteArray ensureNullTerminated.
+	firstChild key should equal: 'Charadrii' asByteArray nullTerminated.
 	firstChild value should equal: 'Charadrii'.
 
 	secondChild := root children second.
 	secondChild should beKindOf: ArtLeafNode.
-	secondChild key should equal: 'lengthy' asByteArray ensureNullTerminated.
+	secondChild key should equal: 'lengthy' asByteArray nullTerminated.
 	secondChild value should equal: 'lengthy'.
 
 	thirdChild := root children third.
 	thirdChild should beKindOf: ArtLeafNode.
-	thirdChild key should equal: 'tamable' asByteArray ensureNullTerminated.
+	thirdChild key should equal: 'tamable' asByteArray nullTerminated.
 	thirdChild value should equal: 'tamable'
 ]
 
@@ -466,7 +466,7 @@ ArtTreeTest >> testShrinkFrom4ToLeaf [
 	tree removeKey: 'abc'.
 	tree size should equal: 1.
 	tree root should beKindOf: ArtLeafNode.
-	tree root key should equal: 'zba' asByteArray ensureNullTerminated.
+	tree root key should equal: 'zba' asByteArray nullTerminated.
 	tree root value should equal: 'zba'
 ]
 

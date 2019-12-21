@@ -100,8 +100,9 @@ ArtLeafNode >> leafNodes [
 
 { #category : #testing }
 ArtLeafNode >> matchesKey: aKey [
-	aKey ifEmpty: [ ^ false ].
-	^ aKey isNotNil and: [ aKey asByteArray ensureNullTerminated = key ]
+	^ aKey isEmptyOrNil
+		ifTrue: [ false ]
+		ifFalse: [ aKey = key ]
 ]
 
 { #category : #accessing }

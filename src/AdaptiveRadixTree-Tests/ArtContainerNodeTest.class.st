@@ -64,7 +64,7 @@ ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
 	node prefixSize should equal: 0.
 
 	leaf := ArtLeafNode new
-		key: 'abcdefghijkl' asByteArray ensureNullTerminated;
+		key: 'abcdefghijkl' asByteArray nullTerminated;
 		value: 'End node';
 		yourself.
 	node := ArtNode4 new.
@@ -87,7 +87,7 @@ ArtContainerNodeTest >> testSplitAtPrefixIndexDepth [
 ArtContainerNodeTest >> testprefixMismatchWithDepth [
 	| node key |
 
-	key := 'abc' asByteArray ensureNullTerminated.
+	key := 'abc' asByteArray nullTerminated.
 	node := ArtNode4 new.
 
 	node

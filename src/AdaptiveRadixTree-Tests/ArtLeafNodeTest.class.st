@@ -13,16 +13,17 @@ ArtLeafNodeTest >> testAtPutDepth [
 
 { #category : #tests }
 ArtLeafNodeTest >> testMatchesKey [
-	| node |
+	| node key |
 
+	key := 'hello' asByteArray nullTerminated.
 	node := ArtLeafNode new
-		key: 'hello' asByteArray ensureNullTerminated;
+		key: key;
 		value: 'world';
 		yourself.
-	(node matchesKey: 'hello') should be: true.
-	(node matchesKey: ' hello') should be: false.
-	(node matchesKey: 'h') should be: false.
-	(node matchesKey: '') should be: false
+	(node matchesKey: 'hello' asByteArray nullTerminated) should be: true.
+	(node matchesKey: ' hello' asByteArray nullTerminated) should be: false.
+	(node matchesKey: 'h' asByteArray nullTerminated) should be: false.
+	(node matchesKey: '' asByteArray nullTerminated) should be: false
 ]
 
 { #category : #tests }
@@ -31,13 +32,13 @@ ArtLeafNodeTest >> testPutAtEnd [
 
 	tree := ArtTree new.
 	node := (ArtLeafNode on: tree)
-		key: 'abc' asByteArray ensureNullTerminated;
+		key: 'abc' asByteArray nullTerminated;
 		value: 'ABC';
 		parent: tree;
 		yourself.
 	leaf1 := node copy.
 	leaf2 := (ArtLeafNode on: tree)
-		key: 'abcd' asByteArray ensureNullTerminated;
+		key: 'abcd' asByteArray nullTerminated;
 		value: 'abcd';
 		yourself.
 
@@ -68,13 +69,13 @@ ArtLeafNodeTest >> testPutAtMiddle [
 
 	tree := ArtTree new.
 	node := (ArtLeafNode on: tree)
-		key: 'abc' asByteArray ensureNullTerminated;
+		key: 'abc' asByteArray nullTerminated;
 		value: 'ABC';
 		parent: tree;
 		yourself.
 	leaf1 := node copy.
 	leaf2 := (ArtLeafNode on: tree)
-		key: 'abd' asByteArray ensureNullTerminated;
+		key: 'abd' asByteArray nullTerminated;
 		value: 'ABD';
 		yourself.
 
@@ -105,13 +106,13 @@ ArtLeafNodeTest >> testPutAtStart [
 
 	tree := ArtTree new.
 	node := (ArtLeafNode on: tree)
-		key: 'abc' asByteArray ensureNullTerminated;
+		key: 'abc' asByteArray nullTerminated;
 		value: 'ABC';
 		parent: tree;
 		yourself.
 	leaf1 := node copy.
 	leaf2 := (ArtLeafNode on: tree)
-		key: 'def' asByteArray ensureNullTerminated;
+		key: 'def' asByteArray nullTerminated;
 		value: 'DEF';
 		yourself.
 

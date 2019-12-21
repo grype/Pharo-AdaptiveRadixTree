@@ -113,7 +113,7 @@ ArtTree >> at: firstKey at: secondKey put: aValue [
 { #category : #accessing }
 ArtTree >> at: key ifAbsent: aBlock [
 	^ (root
-		ifNotNil: [ :node | node at: key asByteArray ensureNullTerminated depth: 1 ])
+		ifNotNil: [ :node | node at: key asByteArray nullTerminated depth: 1 ])
 		ifNil: [ aBlock value ]
 ]
 
@@ -135,7 +135,7 @@ ArtTree >> at: aKey put: aValue [
 
 	aKey size > 0
 		ifFalse: [ ^ self ].
-	key := aKey asByteArray ensureNullTerminated.
+	key := aKey asByteArray nullTerminated.
 	^ root
 		ifNil: [ root := (ArtLeafNode on: self)
 				key: key;
@@ -203,7 +203,7 @@ ArtTree >> isHealthy [
 { #category : #'private-accessing' }
 ArtTree >> nodeAt: aKey [
 	^ root
-		ifNotNil: [ :node | node nodeAt: aKey asByteArray ensureNullTerminated depth: 1 ]
+		ifNotNil: [ :node | node nodeAt: aKey asByteArray nullTerminated depth: 1 ]
 ]
 
 { #category : #removing }
@@ -230,10 +230,10 @@ ArtTree >> removeKey: aKey ifAbsent: absentBlock [
 
 	| k |
 
-	k := aKey asByteArray ensureNullTerminated.
+	k := aKey asByteArray nullTerminated.
 	^ root
 		ifNil: [ absentBlock value ]
-		ifNotNil: [ (root isLeaf and: [ root matchesKey: aKey ])
+		ifNotNil: [ (root isLeaf and: [ root matchesKey: k ])
 				ifTrue: [ | val |
 
 					val := root.
