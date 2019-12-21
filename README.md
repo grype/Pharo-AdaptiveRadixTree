@@ -26,3 +26,18 @@ tree do: [:each | ... ].
 tree asDictionary.
 tree associations.
 ```
+
+```smalltalk
+t := ArtTree new.
+stream := '/usr/share/dict/words' asFileReference readStream.
+
+[ stream atEnd ] whileFalse: [ 
+	stream nextLine ifNotEmpty: [ :line | t at: line put: line ].
+	].
+t size. "235886"
+
+selection := t select: [ :each | each asLowercase beginsWith: 'pharo' ].
+selection size. "3"
+
+(ArtNode gtMapViewBuilder value: selection root) inspect.
+```
