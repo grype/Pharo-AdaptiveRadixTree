@@ -41,3 +41,5 @@ selection size. "3"
 
 (ArtNode gtMapViewBuilder value: selection root) inspect.
 ```
+
+![Visualization](resources/pharo-art.png)
