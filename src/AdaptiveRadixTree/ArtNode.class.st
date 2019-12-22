@@ -115,11 +115,6 @@ ArtNode >> size [
 ]
 
 { #category : #accessing }
-ArtNode >> totalSizeInMemory [
-	^ self subclassResponsibility
-]
-
-{ #category : #accessing }
 ArtNode >> tree [
 	^ tree
 ]

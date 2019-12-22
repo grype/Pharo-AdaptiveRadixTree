@@ -383,19 +383,6 @@ ArtContainerNode >> tallyUp [
 	tally := tally + 1
 ]
 
-{ #category : #accessing }
-ArtContainerNode >> totalSizeInMemory [
-	| total |
-
-	total := self sizeInMemory + prefix sizeInMemory
-		+ prefixSize sizeInMemory + tally sizeInMemory + keys sizeInMemory
-		+ children sizeInMemory.
-
-	children
-		ifNotEmpty: [ total := children sum: [ :each | each sizeInMemory ] ].
-	^ total
-]
-
 { #category : #enumerating }
 ArtContainerNode >> valuesDo: aBlock [
 	children select: #isNotNil thenDo: [ :node | node valuesDo: aBlock ]

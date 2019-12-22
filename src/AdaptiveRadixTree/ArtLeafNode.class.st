@@ -144,11 +144,6 @@ ArtLeafNode >> size [
 ]
 
 { #category : #accessing }
-ArtLeafNode >> totalSizeInMemory [
-	^ self sizeInMemory + key sizeInMemory + value sizeInMemory
-]
-
-{ #category : #accessing }
 ArtLeafNode >> value [
 	^ value
 ]
