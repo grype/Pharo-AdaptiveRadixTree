@@ -54,7 +54,7 @@ ArtNode class >> gtMapViewBuilder [
 	b labelShape text
 		text: [ :node | 
 			node isLeaf
-				ifTrue: [ node key allButLast asString , ':' , node value ]
+				ifTrue: [ node key allButLast asString , ':' , node value asString ]
 				ifFalse: [ node prefixSize > 0
 						ifTrue: [ node prefixSize > node class maxPrefixSize
 								ifTrue: [ (node prefix copyFrom: 1 to: node class maxPrefixSize) asString , '+' ]
