@@ -1,6 +1,10 @@
-Extension { #name : #SequenceableCollectionTest }
+Class {
+	#name : #SequenceableCollectionTest,
+	#superclass : #TestCase,
+	#category : #'AdaptiveRadixTree-Tests'
+}
 
-{ #category : #'*AdaptiveRadixTree' }
+{ #category : #tests }
 SequenceableCollectionTest >> testShiftLeftFromTo [
 
 	(#(1 2 3 4) shiftLeft: 1 from: 2 to: 4) should equal: #(2 3 4 4).
@@ -13,7 +17,7 @@ SequenceableCollectionTest >> testShiftLeftFromTo [
 	(#(1 2 3) shiftLeft: 1 from: 2 to: 2) should equal: #(2 2 3)
 ]
 
-{ #category : #'*AdaptiveRadixTree' }
+{ #category : #tests }
 SequenceableCollectionTest >> testShiftRightFromTo [
 	(#(1 2 3 4) shiftRight: 1 from: 1 to: 3) should equal: #(1 1 2 3).
 	(#(1 2 3 4) shiftRight: 2 from: 1 to: 2) should equal: #(1 1 1 2).
