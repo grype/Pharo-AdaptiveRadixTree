@@ -8,7 +8,7 @@ Class {
 BaselineOfAdaptiveRadixTree >> baseline: spec [
 	<baseline>
 	spec
-		for: #pharo
+		for: #common
 		do: [ self roassal: spec.
 			spec
 				package: 'AdaptiveRadixTree';
