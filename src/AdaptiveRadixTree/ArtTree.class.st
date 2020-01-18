@@ -124,7 +124,9 @@ ArtTree >> at: aKey ifAbsentPut: aBlock [
 
 { #category : #accessing }
 ArtTree >> at: aKey ifPresent: aBlock [
-	^ (root ifNotNil: [ :node | node at: aKey ]) ifNotNil: aBlock
+	^ (root
+		ifNotNil: [ :node | node at: aKey asByteArray nullTerminated depth: 1 ])
+		ifNotNil: aBlock
 ]
 
 { #category : #accessing }
