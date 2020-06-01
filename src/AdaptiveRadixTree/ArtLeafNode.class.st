@@ -52,7 +52,7 @@ ArtLeafNode >> at: aKey put: aValue depth: depth [
 
 	(self matchesKey: aKey)
 		ifTrue: [ self value: aValue.
-			^ false ].
+			^ aValue ].
 
 	newContainer := ArtNode4 on: tree.
 	newLeaf := (ArtLeafNode on: tree)
