@@ -45,7 +45,7 @@ ArtNode >> allNodes [
 	| collection |
 
 	collection := OrderedCollection new.
-	self nodesDo: [ :node | collection add: node ].
+	self withAllChildNodesDo: [ :node | collection add: node ].
 	^ collection 
 ]
 

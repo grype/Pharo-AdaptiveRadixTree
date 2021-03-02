@@ -19,49 +19,30 @@ ArtNode >> childrenWithKeys [
 
 { #category : #'*AdaptiveRadixTree-Tools' }
 ArtNode >> gtInspectorMapIn: composite [
-	<gtInspectorPresentationOrder: 10>
-	| b |
 
-	composite roassal2
-		title: 'Map';
-		initializeView: [ self class gtMapViewBuilder value: self ]
+	<gtInspectorPresentationOrder: -10>
+	<inspectorPresentationOrder: 999 title: 'Map'>
+	^ composite roassal3
+		  title: 'Map';
+		  initializeCanvas: [ self class gtMapViewBuilderFor: self ]
 ]
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtNode class >> gtMapViewBuilder [
-	^ [ :root | 
-	| b map |
+ArtNode >> gtInspectorParentIn: composite [
 
-	map := root allChildrenWithKeys.
-	b := RTInteractiveTreeBuilder new.
-	b shape
-		withText: [ :node | 
-			map
-				detect: [ :assoc | assoc value == node ]
-				ifFound: [ :assoc | assoc key asCharacter asString ]
-				ifNone: [ '' ] ].
-	b view canvas color: (Color colorFrom: '#EEE').
-	b
-		explore: root
-		using: [ :node | 
-			node isLeaf
-				ifTrue: [ Array new ]
-				ifFalse: [ 
-					node childrenWithKeys collect: #value
-					"node childNodes "
-					] ].
+	<gtInspectorPresentationOrder: 20>
+	<inspectorPresentationOrder: 999 title: 'Parent'>
+	^ composite roassal3
+		  title: 'Parent';
+		  when: [ parent isNotNil ];
+		  initializeCanvas: [ self class gtMapViewBuilderFor: parent ]
+]
 
-	b labelShape text
-		text: [ :node | 
-			node isLeaf
-				ifTrue: [ node key allButLast asString , ':' , node value asString ]
-				ifFalse: [ node prefixSize > 0
-						ifTrue: [ node prefixSize > node class maxPrefixSize
-								ifTrue: [ (node prefix copyFrom: 1 to: node class maxPrefixSize) asString , '+' ]
-								ifFalse: [ node prefix copyFrom: 1 to: node prefixSize ] ]
-						ifFalse: [ '' ] ] ].
-	b rightward.
-	b verticalGap: 20.
-	b build.
-	b view ]
+{ #category : #'*AdaptiveRadixTree-Tools' }
+ArtNode class >> gtMapViewBuilderFor: node [
+
+	| visualizer |
+	visualizer := ArtNodeVisualizer new.
+	visualizer buildWithNode: node.
+	^ visualizer canvas
 ]
