@@ -82,9 +82,9 @@ ArtNode48 >> minimum [
 	| index |
 
 	index := keys
-		detectIndex: [ :byte :i | (keys at: i) ~= 0 ]
+		detectIndex: [ :byte | byte ~= 0 ]
 		ifNone: [ keys size ].
-	^ (children at: index) minimum
+	^ (children at: (keys at: index)) minimum
 ]
 
 { #category : #adding }
