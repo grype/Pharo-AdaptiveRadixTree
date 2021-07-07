@@ -40,6 +40,18 @@ ArtNode class >> on: aTree [
 		yourself
 ]
 
+{ #category : #iterating }
+ArtNode >> allChildrenWithKeys [
+	^ self childrenWithKeys
+		flatCollect: [ :kv | 
+			(kv value isKindOf: ArtContainerNode)
+				ifTrue: [ OrderedCollection new
+						add: kv;
+						addAll: kv value allChildrenWithKeys;
+						yourself ]
+				ifFalse: [ {kv} ] ]
+]
+
 { #category : #accessing }
 ArtNode >> allNodes [
 	| collection |
@@ -64,6 +76,11 @@ ArtNode >> at: aKey put: aValue depth: depth [
 	"Insert aValue at aKey, starting with given depth. This method is meant to be called recursively.
 	 Returns true if a node was actually added (as opposed to updating existing node)."
 	^ self subclassResponsibility 
+]
+
+{ #category : #iterating }
+ArtNode >> childrenWithKeys [
+	^ self subclassResponsibility
 ]
 
 { #category : #testing }

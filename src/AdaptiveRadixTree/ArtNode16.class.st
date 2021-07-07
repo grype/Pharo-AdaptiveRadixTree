@@ -52,6 +52,13 @@ ArtNode16 >> addChild: aChildNode at: aByte [
 	^ aChildNode
 ]
 
+{ #category : #iterating }
+ArtNode16 >> childrenWithKeys [
+	^ ((keys copyFrom: 1 to: self size) asOrderedCollection
+		collectWithIndex: [ :key :index | key -> (children at: index) ])
+		select: [ :kv | kv key > 0 and: [ kv value isNotNil ] ]
+]
+
 { #category : #testing }
 ArtNode16 >> grow [
 	| newNode index newKeys newChildren |

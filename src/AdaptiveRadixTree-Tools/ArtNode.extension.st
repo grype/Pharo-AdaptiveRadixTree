@@ -1,23 +1,6 @@
 Extension { #name : #ArtNode }
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtNode >> allChildrenWithKeys [
-	^ self childrenWithKeys
-		flatCollect: [ :kv | 
-			(kv value isKindOf: ArtContainerNode)
-				ifTrue: [ OrderedCollection new
-						add: kv;
-						addAll: kv value allChildrenWithKeys;
-						yourself ]
-				ifFalse: [ {kv} ] ]
-]
-
-{ #category : #'*AdaptiveRadixTree-Tools' }
-ArtNode >> childrenWithKeys [
-	^ self subclassResponsibility
-]
-
-{ #category : #'*AdaptiveRadixTree-Tools' }
 ArtNode >> gtInspectorMapIn: composite [
 
 	<gtInspectorPresentationOrder: -10>

@@ -71,6 +71,11 @@ ArtLeafNode >> at: aKey put: aValue depth: depth [
 	^ aValue
 ]
 
+{ #category : #iterating }
+ArtLeafNode >> childrenWithKeys [
+	^ {  }
+]
+
 { #category : #comparing }
 ArtLeafNode >> hash [
 	"Answer an integer value that is related to the identity of the receiver."

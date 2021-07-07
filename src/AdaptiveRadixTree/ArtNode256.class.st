@@ -35,6 +35,13 @@ ArtNode256 >> addChild: aChildNode at: aByte [
 	^ aChildNode
 ]
 
+{ #category : #iterating }
+ArtNode256 >> childrenWithKeys [
+	^ (children asOrderedCollection
+		collectWithIndex: [ :key :index | (index - 1) -> (children at: index) ])
+		select: [ :kv | kv key > 0 and: [ kv value isNotNil ] ]
+]
+
 { #category : #testing }
 ArtNode256 >> grow [
 	"I cannot grow"
