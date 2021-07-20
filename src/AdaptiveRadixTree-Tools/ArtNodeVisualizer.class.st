@@ -30,6 +30,7 @@ ArtNodeVisualizer >> buildWithNode: node [
 					          ifNone: [ '' ]) ]
 		         as: RSGroup.
 
+	canvas color: Smalltalk ui theme darkBaseColor.
 	canvas addAll: nodes.
 
 	nodes @ (RSMenuActivable new menuDo: [ :menu :element | 
@@ -81,7 +82,7 @@ ArtNodeVisualizer >> elementForNode: aNode text: text [
 			  gg add: (RSLabel new
 					   fontSize: 5;
 					   text: aNode key asString;
-					   color: Color white;
+					   color: (Smalltalk ui theme textColor);
 					   yourself).
 			  RSHorizontalLineLayout new
 				  gapSize: 2;
