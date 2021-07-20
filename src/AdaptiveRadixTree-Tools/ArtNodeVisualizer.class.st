@@ -7,6 +7,12 @@ Class {
 	#category : #'AdaptiveRadixTree-Tools'
 }
 
+{ #category : #'instance creation' }
+ArtNodeVisualizer class >> on: aCanvas [
+
+	^ self basicNew initializeWithCanvas: aCanvas
+]
+
 { #category : #building }
 ArtNodeVisualizer >> buildMenuOn: aMenu for: element [
 ]
@@ -90,6 +96,12 @@ ArtNodeVisualizer >> initialize [
 	super initialize.
 	canvas := RSCanvas new.
 	canvas color: Smalltalk ui theme backgroundColor
+]
+
+{ #category : #initialization }
+ArtNodeVisualizer >> initializeWithCanvas: aCanvas [
+	self initialize.
+	canvas := aCanvas 
 ]
 
 { #category : #building }

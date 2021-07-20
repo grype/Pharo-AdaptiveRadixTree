@@ -1,24 +1,24 @@
 Extension { #name : #ArtNode }
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtNode >> gtInspectorMapIn: composite [
+ArtNode >> gtInspectorMap [
 
-	<gtInspectorPresentationOrder: -10>
 	<inspectorPresentationOrder: 999 title: 'Map'>
-	^ composite roassal3
-		  title: 'Map';
-		  initializeCanvas: [ self class gtMapViewBuilderFor: self ]
+	^ SpRoassalPresenter new
+		  script: [ :canvas | 
+			  (ArtNodeVisualizer on: canvas) buildWithNode: self ];
+		  yourself
 ]
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtNode >> gtInspectorParentIn: composite [
+ArtNode >> gtInspectorParent [
 
-	<gtInspectorPresentationOrder: 20>
 	<inspectorPresentationOrder: 999 title: 'Parent'>
-	^ composite roassal3
-		  title: 'Parent';
-		  when: [ parent isNotNil ];
-		  initializeCanvas: [ self class gtMapViewBuilderFor: parent ]
+	^ SpRoassalPresenter new
+		  script: [ :canvas | 
+			  (parent isKindOf: ArtNode) ifTrue: [ 
+					  (ArtNodeVisualizer on: canvas) buildWithNode: parent ] ];
+		  yourself
 ]
 
 { #category : #'*AdaptiveRadixTree-Tools' }
