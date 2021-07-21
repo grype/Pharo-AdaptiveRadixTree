@@ -110,14 +110,13 @@ ArtNodeVisualizer >> initializeWithCanvas: aCanvas [
 { #category : #building }
 ArtNodeVisualizer >> popupTextForNode: aNode [
 
-	| children |
 	^ aNode isLeaf
 		  ifTrue: [ aNode value asString ]
 		  ifFalse: [ 
-			  children := aNode allNodes copyWithout: aNode.
-			  children := children first: (children size min: 10).
-			  (children collect: [ :n | n value asString ]) joinUsing:
-				  Character cr ]
+			  aNode prefixSize > 0
+				  ifTrue: [ 
+				  '+' , (aNode prefix first: aNode prefixSize) asString trimmed ]
+				  ifFalse: [ '' ] ]
 ]
 
 { #category : #'private - utilities' }
