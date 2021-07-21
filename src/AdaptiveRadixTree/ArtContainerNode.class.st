@@ -139,18 +139,6 @@ ArtContainerNode >> grow [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
-ArtContainerNode >> gtLeavesIn: composite [
-
-	<gtInspectorPresentationOrder: 10>
-	<inspectorPresentationOrder: 999 title: 'Leaves'>
-	^ composite fastList
-		  title: 'Leaves';
-		  beMultiple;
-		  display: [ (self allNodes select: [ :aNode | aNode isLeaf ]) flatCollect: #value ];
-		  format: [ :each | each description ]
-]
-
 { #category : #accessing }
 ArtContainerNode >> indexOf: aKey [
 	^ self subclassResponsibility 

@@ -1,9 +1,9 @@
 Extension { #name : #ArtNode }
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtNode >> gtInspectorMap [
+ArtNode >> gtInspectorIndex [
 
-	<inspectorPresentationOrder: 999 title: 'Map'>
+	<inspectorPresentationOrder: 999 title: 'Index'>
 	^ SpRoassalPresenter new
 		  script: [ :canvas | 
 			  (ArtNodeVisualizer on: canvas) buildWithNode: self ];

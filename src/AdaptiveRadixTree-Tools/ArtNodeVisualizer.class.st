@@ -62,18 +62,20 @@ ArtNodeVisualizer >> canvas [
 { #category : #'private - utilities' }
 ArtNodeVisualizer >> elementForNode: aNode text: text [
 
-	| g |
+	| g label |
 	g := RSGroup new.
 	g add: (RSCircle new
 			 size: 10;
 			 color: (self shapeColorForNode: aNode);
 			 borderColor: Color gray;
 			 yourself).
-	g add: (RSLabel new
-			 fontSize: 5;
-			 text: text;
-			 color: (self textColorForNode: aNode);
-			 yourself).
+	label := RSLabel new
+		         fontSize: 5;
+		         text: text;
+		         color: (self textColorForNode: aNode);
+		         yourself.
+
+	g add: label.
 	^ aNode isLeaf
 		  ifTrue: [ 
 			  | gg |
@@ -82,7 +84,7 @@ ArtNodeVisualizer >> elementForNode: aNode text: text [
 			  gg add: (RSLabel new
 					   fontSize: 5;
 					   text: aNode key asString;
-					   color: (Smalltalk ui theme textColor);
+					   color: Smalltalk ui theme textColor;
 					   yourself).
 			  RSHorizontalLineLayout new
 				  gapSize: 2;
