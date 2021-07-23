@@ -4,9 +4,11 @@ Extension { #name : #ArtNode }
 ArtNode >> gtInspectorChildren [
 
 	<inspectorPresentationOrder: 90 title: 'Children'>
-	^ SpRoassalPresenter new
-		  script: [ :canvas | 
-			  (ArtNodeVisualizer on: canvas) buildWithNode: self ];
+	| canvas |
+	canvas := RSCanvas new.
+	(ArtNodeVisualizer on: canvas) buildWithNode: self.
+	^ SpRoassal3InspectorPresenter new
+		  canvas: canvas;
 		  yourself
 ]
 
