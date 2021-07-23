@@ -1,9 +1,9 @@
 Extension { #name : #ArtTree }
 
 { #category : #'*AdaptiveRadixTree-Tools' }
-ArtTree >> gtInspectorIndex [
+ArtTree >> gtInspectorTree [
 
-	<inspectorPresentationOrder: 90 title: 'Index'>
+	<inspectorPresentationOrder: 90 title: 'Tree'>
 	^ self root gtInspectorChildren
 ]
 
